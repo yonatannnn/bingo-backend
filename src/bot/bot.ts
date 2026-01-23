@@ -176,7 +176,7 @@ export function initializeBot(io: Server) {
       }
 
       const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3001';
-      const gameUrl = `${frontendUrl}?userId=${user._id}&token=${encodeURIComponent(chatId.toString())}`;
+      const gameUrl = `${frontendUrl}?userId=${user._id.toString()}&token=${encodeURIComponent(chatId.toString())}`;
 
       const keyboard = {
         reply_markup: {
@@ -242,7 +242,7 @@ export function initializeBot(io: Server) {
           }
 
           const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3001';
-          const gameUrl = `${frontendUrl}?userId=${user._id}&token=${encodeURIComponent(chatId.toString())}`;
+          const gameUrl = `${frontendUrl}?userId=${user._id.toString()}&token=${encodeURIComponent(chatId.toString())}`;
 
           await bot.sendMessage(chatId, '🎮 Choose your game mode!', {
             reply_markup: {
