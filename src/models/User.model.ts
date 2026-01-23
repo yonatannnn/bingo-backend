@@ -56,5 +56,14 @@ const UserSchema = new Schema<IUser>(
   }
 );
 
-export default mongoose.model<IUser>('User', UserSchema);
+const UserModel = mongoose.model<IUser>('User', UserSchema);
+
+// Drop email index if it exists (run once on startup)
+if (mongoose.connection.readyState === 1) {
+  UserModel.collection.dropIndex('email_1').catch(() => {
+    // Index doesn't exist, ignore error
+  });
+}
+
+export default UserModel;
 

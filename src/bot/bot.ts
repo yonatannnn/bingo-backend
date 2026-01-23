@@ -1,6 +1,7 @@
 import TelegramBot from 'node-telegram-bot-api';
 import { Server } from 'socket.io';
 import dotenv from 'dotenv';
+import mongoose from 'mongoose';
 import User from '../models/User.model';
 import { generateReferralCode } from '../utils/referral';
 
@@ -152,6 +153,20 @@ export function initializeBot(io: Server) {
           errorMessage = '❌ This phone number is already registered.';
         } else if (error.keyPattern?.referralCode) {
           errorMessage = '❌ Referral code conflict. Please try again.';
+        } else if (error.keyPattern?.email) {
+          // Email index issue - try to drop it and retry
+          console.log('⚠️  Email index conflict detected, attempting to fix...');
+          try {
+            if (mongoose.connection.db) {
+              await mongoose.connection.db.collection('users').dropIndex('email_1');
+              console.log('✅ Dropped email index, user should retry registration');
+              errorMessage = '❌ Registration failed due to database issue. Please try again in a moment.';
+            } else {
+              errorMessage = '❌ Registration failed. Please contact support.';
+            }
+          } catch (dropError) {
+            errorMessage = '❌ Registration failed. Please contact support.';
+          }
         }
       } else if (error.name === 'ValidationError') {
         errorMessage = `❌ Validation error: ${Object.values(error.errors).map((e: any) => e.message).join(', ')}`;
