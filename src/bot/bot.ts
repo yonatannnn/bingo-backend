@@ -176,6 +176,60 @@ export function initializeBot(io: Server) {
     }
   });
 
+  // Deposit command
+  bot.onText(/\/deposit/, async (msg) => {
+    const chatId = msg.chat.id;
+
+    try {
+      const user = await User.findOne({ telegramId: chatId });
+      if (!user) {
+        await bot.sendMessage(chatId, '❌ Please register first using /register');
+        return;
+      }
+
+      // Send payment option selection
+      const paymentMessage = 'እባክዎ የሚጠቀሙትን የክፍያ እማራጭ ይምረጡ (Telebirr ወይም Commercial Bank of Ethiopia)';
+      
+      const paymentKeyboard = {
+        reply_markup: {
+          inline_keyboard: [
+            [
+              {
+                text: '📱 Telebirr',
+                callback_data: 'deposit_telebirr',
+              },
+              {
+                text: '🏦 CBE',
+                callback_data: 'deposit_cbe',
+              },
+            ],
+          ],
+        },
+      };
+
+      await bot.sendMessage(chatId, paymentMessage, paymentKeyboard);
+
+      // Send account details and instructions
+      const accountDetails = `📅 እባክዎ የደረሶትን Transaction ID ያስገቡ
+
+(Example:- CBE(Bank): FT25106S48WP)
+(Example:- Telebirr: CDF8QQMTVE)
+
+💵 ወደ ንግድ ባንክ ለማስገባት: 1000686060504
+📱 ወደ ቴሌብር ለማስገባት: 0978280042
+
+👉 ቁጥሮቹን Copy ለማድረግ እባኮትን የፅሁፍ አካላቸውን ያጫኑ።
+
+ከፍተኛ ማስገባት የሚቻለው = 1000 Birr
+ትንሹ ማስገባት ሚቻለው = 50 Birr`;
+
+      await bot.sendMessage(chatId, accountDetails);
+    } catch (error) {
+      console.error('Deposit command error:', error);
+      await bot.sendMessage(chatId, '❌ Error processing deposit request. Please try again.');
+    }
+  });
+
   // Play command
   bot.onText(/\/play/, async (msg) => {
     const chatId = msg.chat.id;
@@ -275,7 +329,77 @@ export function initializeBot(io: Server) {
 
         case 'deposit':
           await bot.answerCallbackQuery(query.id);
-          await bot.sendMessage(chatId, '💰 Deposit feature coming soon!');
+          const depositUser = await User.findOne({ telegramId: chatId });
+          if (!depositUser) {
+            await bot.sendMessage(chatId, '❌ Please register first using /register');
+            return;
+          }
+
+          // Send payment option selection
+          const paymentMessage = 'እባክዎ የሚጠቀሙትን የክፍያ እማራጭ ይምረጡ (Telebirr ወይም Commercial Bank of Ethiopia)';
+          
+          const paymentKeyboard = {
+            reply_markup: {
+              inline_keyboard: [
+                [
+                  {
+                    text: '📱 Telebirr',
+                    callback_data: 'deposit_telebirr',
+                  },
+                  {
+                    text: '🏦 CBE',
+                    callback_data: 'deposit_cbe',
+                  },
+                ],
+              ],
+            },
+          };
+
+          await bot.sendMessage(chatId, paymentMessage, paymentKeyboard);
+
+          // Send account details and instructions
+          const accountDetails = `📅 እባክዎ የደረሶትን Transaction ID ያስገቡ
+
+(Example:- CBE(Bank): FT25106S48WP)
+(Example:- Telebirr: CDF8QQMTVE)
+
+💵 ወደ ንግድ ባንክ ለማስገባት: 1000686060504
+📱 ወደ ቴሌብር ለማስገባት: 0978280042
+
+👉 ቁጥሮቹን Copy ለማድረግ እባኮትን የፅሁፍ አካላቸውን ያጫኑ።
+
+ከፍተኛ ማስገባት የሚቻለው = 1000 Birr
+ትንሹ ማስገባት ሚቻለው = 50 Birr`;
+
+          await bot.sendMessage(chatId, accountDetails);
+          break;
+
+        case 'deposit_telebirr':
+          await bot.answerCallbackQuery(query.id);
+          await bot.sendMessage(
+            chatId,
+            '📱 እባክዎ የቴሌብር Transaction ID ያስገቡ:\n\n(Example: CDF8QQMTVE)',
+            {
+              reply_markup: {
+                force_reply: true,
+                input_field_placeholder: 'Enter Telebirr Transaction ID',
+              },
+            }
+          );
+          break;
+
+        case 'deposit_cbe':
+          await bot.answerCallbackQuery(query.id);
+          await bot.sendMessage(
+            chatId,
+            '🏦 እባክዎ የCBE Transaction ID ያስገቡ:\n\n(Example: FT25106S48WP)',
+            {
+              reply_markup: {
+                force_reply: true,
+                input_field_placeholder: 'Enter CBE Transaction ID',
+              },
+            }
+          );
           break;
 
         case 'withdraw':
@@ -294,6 +418,86 @@ export function initializeBot(io: Server) {
     } catch (error) {
       console.error('Callback query error:', error);
       await bot.answerCallbackQuery(query.id, { text: '❌ Error processing request' });
+    }
+  });
+
+  // Handle deposit transaction IDs (reply to force_reply messages)
+  bot.on('message', async (msg) => {
+    const chatId = msg.chat.id;
+    const text = msg.text;
+    const replyToMessage = msg.reply_to_message;
+
+    // Skip if it's a command or not a reply
+    if (!text || !replyToMessage || text.startsWith('/')) {
+      return;
+    }
+
+    const replyText = replyToMessage.text || '';
+    
+    // Check if it's a Telebirr transaction ID prompt
+    if (replyText.includes('ቴሌብር Transaction ID') || replyText.includes('Telebirr Transaction ID')) {
+      try {
+        const user = await User.findOne({ telegramId: chatId });
+        if (!user) {
+          await bot.sendMessage(chatId, '❌ User not found. Please register first.');
+          return;
+        }
+
+        // Validate transaction ID format (alphanumeric, 6-20 characters)
+        const transactionId = text.trim();
+        if (!/^[A-Z0-9]{6,20}$/i.test(transactionId)) {
+          await bot.sendMessage(
+            chatId,
+            '❌ Invalid Transaction ID format. Please enter a valid Telebirr Transaction ID.\n\n(Example: CDF8QQMTVE)'
+          );
+          return;
+        }
+
+        // Store deposit request (you can create a Deposit model later)
+        console.log(`📱 Telebirr deposit request: User ${user.telegramId}, Transaction ID: ${transactionId}`);
+        
+        await bot.sendMessage(
+          chatId,
+          `✅ የቴሌብር Transaction ID ተቀብሏል!\n\nTransaction ID: ${transactionId}\n\nእባክዎ ይጠብቁ... የእርስዎ ክፍያ እየተፈተሸ ነው።\n\nየክፍያዎ ከተፈተሸ በኋላ ወደ ሂሳብዎ ይጨመራል።`
+        );
+      } catch (error) {
+        console.error('Telebirr deposit error:', error);
+        await bot.sendMessage(chatId, '❌ Error processing deposit. Please try again.');
+      }
+      return;
+    }
+
+    // Check if it's a CBE transaction ID prompt
+    if (replyText.includes('CBE Transaction ID') || replyText.includes('ንግድ ባንክ')) {
+      try {
+        const user = await User.findOne({ telegramId: chatId });
+        if (!user) {
+          await bot.sendMessage(chatId, '❌ User not found. Please register first.');
+          return;
+        }
+
+        // Validate transaction ID format (alphanumeric, 6-20 characters)
+        const transactionId = text.trim();
+        if (!/^[A-Z0-9]{6,20}$/i.test(transactionId)) {
+          await bot.sendMessage(
+            chatId,
+            '❌ Invalid Transaction ID format. Please enter a valid CBE Transaction ID.\n\n(Example: FT25106S48WP)'
+          );
+          return;
+        }
+
+        // Store deposit request
+        console.log(`🏦 CBE deposit request: User ${user.telegramId}, Transaction ID: ${transactionId}`);
+        
+        await bot.sendMessage(
+          chatId,
+          `✅ የCBE Transaction ID ተቀብሏል!\n\nTransaction ID: ${transactionId}\n\nእባክዎ ይጠብቁ... የእርስዎ ክፍያ እየተፈተሸ ነው።\n\nየክፍያዎ ከተፈተሸ በኋላ ወደ ሂሳብዎ ይጨመራል።`
+        );
+      } catch (error) {
+        console.error('CBE deposit error:', error);
+        await bot.sendMessage(chatId, '❌ Error processing deposit. Please try again.');
+      }
+      return;
     }
   });
 
