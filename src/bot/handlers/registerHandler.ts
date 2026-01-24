@@ -34,14 +34,12 @@ export function setupRegisterHandler(bot: TelegramBot) {
         return;
       }
 
-      // Create new user
+      // Create new user (balance and demoGames are set automatically by API)
       const user = await createUser({
         telegramId: chatId,
         firstName: contact.first_name || 'User',
         lastName: contact.last_name,
         phone: contact.phone_number,
-        balance: 5,
-        demoGames: 3,
       });
 
       console.log(`✅ User registered successfully: ${user.telegramId} - ${user.firstName} (${user.phone})`);
@@ -86,6 +84,8 @@ export function setupRegisterHandler(bot: TelegramBot) {
           errorMessage = `❌ Validation error: ${error.message}`;
         } else if (errorMsg.includes('network') || errorMsg.includes('fetch')) {
           errorMessage = '❌ Network error. Please check your connection and try again.';
+        } else if (error.message.includes('409') || errorMsg.includes('already exists')) {
+          errorMessage = '❌ This Telegram account is already registered.';
         }
       }
 

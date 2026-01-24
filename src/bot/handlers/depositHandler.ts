@@ -1,5 +1,6 @@
 import TelegramBot from 'node-telegram-bot-api';
 import { findUserByTelegramId } from '../services/userService';
+import { createDeposit } from '../services/walletService';
 import { getPaymentMethodKeyboard, getForceReplyKeyboard } from '../utils/keyboards';
 import { MESSAGES } from '../utils/messages';
 import { validateTransactionId } from '../utils/validators';
@@ -22,9 +23,6 @@ export function setupDepositHandler(bot: TelegramBot) {
       await bot.sendMessage(chatId, MESSAGES.ERROR_DEPOSIT);
     }
   });
-
-  // Handle deposit payment method selection (handled in callbackHandler, but we need to handle the specific deposit callbacks here)
-  // Note: This is handled in callbackHandler, but we keep the message handler here for transaction IDs
 
   // Handle deposit transaction IDs
   bot.on('message', async (msg) => {
@@ -53,11 +51,20 @@ export function setupDepositHandler(bot: TelegramBot) {
           return;
         }
 
+        // Create deposit request via API
+        // Note: Using minimum amount (50) as placeholder - admin will verify and update the actual amount
+        await createDeposit(user._id, 50, 'Telebirr', transactionId);
+        
         console.log(`📱 Telebirr deposit request: User ${user.telegramId}, Transaction ID: ${transactionId}`);
         await bot.sendMessage(chatId, MESSAGES.TELEBIRR_TRANSACTION_RECEIVED(transactionId));
-      } catch (error) {
+      } catch (error: any) {
         console.error('Telebirr deposit error:', error);
-        await bot.sendMessage(chatId, MESSAGES.ERROR_DEPOSIT);
+        const errorMsg = error.message?.toLowerCase() || '';
+        if (errorMsg.includes('invalid amount') || errorMsg.includes('amount')) {
+          await bot.sendMessage(chatId, '❌ Invalid amount. Please contact support.');
+        } else {
+          await bot.sendMessage(chatId, MESSAGES.ERROR_DEPOSIT);
+        }
       }
       return;
     }
@@ -77,14 +84,22 @@ export function setupDepositHandler(bot: TelegramBot) {
           return;
         }
 
+        // Create deposit request via API
+        // Note: Using minimum amount (50) as placeholder - admin will verify and update the actual amount
+        await createDeposit(user._id, 50, 'CBE', transactionId);
+        
         console.log(`🏦 CBE deposit request: User ${user.telegramId}, Transaction ID: ${transactionId}`);
         await bot.sendMessage(chatId, MESSAGES.CBE_TRANSACTION_RECEIVED(transactionId));
-      } catch (error) {
+      } catch (error: any) {
         console.error('CBE deposit error:', error);
-        await bot.sendMessage(chatId, MESSAGES.ERROR_DEPOSIT);
+        const errorMsg = error.message?.toLowerCase() || '';
+        if (errorMsg.includes('invalid amount') || errorMsg.includes('amount')) {
+          await bot.sendMessage(chatId, '❌ Invalid amount. Please contact support.');
+        } else {
+          await bot.sendMessage(chatId, MESSAGES.ERROR_DEPOSIT);
+        }
       }
       return;
     }
   });
 }
-

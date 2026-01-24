@@ -1,5 +1,6 @@
 import TelegramBot from 'node-telegram-bot-api';
-import { findUserByTelegramId, deductUserBalance } from '../services/userService';
+import { findUserByTelegramId } from '../services/userService';
+import { createWithdraw } from '../services/walletService';
 import { getForceReplyKeyboard } from '../utils/keyboards';
 import { MESSAGES } from '../utils/messages';
 import { validateAmount } from '../utils/validators';
@@ -57,26 +58,31 @@ export function setupWithdrawHandler(bot: TelegramBot) {
 
         const amount = amountValidation.value!;
 
-        // Check balance
+        // Check balance (API will also check, but we check first for better UX)
         if (user.balance < amount) {
           await bot.sendMessage(chatId, MESSAGES.INSUFFICIENT_BALANCE(user.balance, amount));
           return;
         }
 
-        // Deduct balance
-        const updatedUser = await deductUserBalance(user._id.toString(), amount);
-        console.log(`💸 Withdrawal: User ${user.telegramId} withdrew ${amount} Birr. New balance: ${updatedUser.balance}`);
+        // Create withdrawal via API (balance is immediately deducted)
+        const result = await createWithdraw(user._id, amount);
+        console.log(`💸 Withdrawal: User ${user.telegramId} withdrew ${amount} Birr. New balance: ${result.newBalance}`);
 
-        await bot.sendMessage(chatId, MESSAGES.WITHDRAW_SUCCESS(amount, updatedUser.balance));
+        await bot.sendMessage(chatId, MESSAGES.WITHDRAW_SUCCESS(amount, result.newBalance));
       } catch (error: any) {
         console.error('Withdraw error:', error);
-        const errorMessage = error.message === 'Insufficient balance' 
-          ? MESSAGES.INSUFFICIENT_BALANCE(0, 0)
-          : MESSAGES.ERROR_WITHDRAW;
+        const errorMsg = error.message?.toLowerCase() || '';
+        let errorMessage = MESSAGES.ERROR_WITHDRAW;
+        
+        if (errorMsg.includes('insufficient balance') || errorMsg.includes('insufficient')) {
+          errorMessage = MESSAGES.INSUFFICIENT_BALANCE(0, 0);
+        } else if (errorMsg.includes('invalid amount')) {
+          errorMessage = MESSAGES.INVALID_AMOUNT;
+        }
+        
         await bot.sendMessage(chatId, errorMessage);
       }
       return;
     }
   });
 }
-

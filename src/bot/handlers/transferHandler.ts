@@ -102,13 +102,15 @@ export function setupTransferHandler(bot: TelegramBot) {
 
         const amount = amountValidation.value!;
 
+        // Check balance (API will also check, but we check first for better UX)
         if (sender.balance < amount) {
           await bot.sendMessage(chatId, MESSAGES.INSUFFICIENT_BALANCE(sender.balance, amount));
           transferService.clearPendingTransfer(chatId);
           return;
         }
 
-        const { sender: updatedSender, receiver } = await transferService.executeTransfer(
+        // Execute transfer via API (atomic operation)
+        const { senderBalance, receiverBalance } = await transferService.executeTransfer(
           sender._id.toString(),
           pendingTransfer.receiverId,
           amount
@@ -116,27 +118,41 @@ export function setupTransferHandler(bot: TelegramBot) {
 
         transferService.clearPendingTransfer(chatId);
 
-        console.log(`🔄 Transfer: ${updatedSender.telegramId} → ${receiver.telegramId}, Amount: ${amount} Birr`);
+        // Fetch receiver info for notification
+        const receiver = await findUserByReferralCode(pendingTransfer.receiverReferralCode);
+        const receiverName = receiver?.firstName || 'User';
+
+        console.log(`🔄 Transfer: ${sender.telegramId} → ${receiver?.telegramId}, Amount: ${amount} Birr`);
 
         await bot.sendMessage(
           chatId,
-          MESSAGES.TRANSFER_SUCCESS(amount, receiver.firstName, updatedSender.balance)
+          MESSAGES.TRANSFER_SUCCESS(amount, receiverName, senderBalance)
         );
 
         // Notify receiver
-        try {
-          await bot.sendMessage(
-            receiver.telegramId,
-            MESSAGES.TRANSFER_RECEIVED(amount, updatedSender.firstName, receiver.balance)
-          );
-        } catch (error) {
-          console.error('Error notifying receiver:', error);
+        if (receiver) {
+          try {
+            await bot.sendMessage(
+              receiver.telegramId,
+              MESSAGES.TRANSFER_RECEIVED(amount, sender.firstName, receiverBalance)
+            );
+          } catch (error) {
+            console.error('Error notifying receiver:', error);
+          }
         }
       } catch (error: any) {
         console.error('Transfer error:', error);
-        const errorMessage = error.message === 'Insufficient balance'
-          ? MESSAGES.INSUFFICIENT_BALANCE(0, 0)
-          : MESSAGES.ERROR_TRANSFER;
+        const errorMsg = error.message?.toLowerCase() || '';
+        let errorMessage = MESSAGES.ERROR_TRANSFER;
+        
+        if (errorMsg.includes('insufficient balance') || errorMsg.includes('insufficient')) {
+          errorMessage = MESSAGES.INSUFFICIENT_BALANCE(0, 0);
+        } else if (errorMsg.includes('invalid amount')) {
+          errorMessage = MESSAGES.INVALID_AMOUNT;
+        } else if (errorMsg.includes('self-transfer') || errorMsg.includes('cannot transfer to yourself')) {
+          errorMessage = MESSAGES.CANNOT_TRANSFER_TO_SELF;
+        }
+        
         await bot.sendMessage(chatId, errorMessage);
         transferService.clearPendingTransfer(chatId);
       }
@@ -144,4 +160,3 @@ export function setupTransferHandler(bot: TelegramBot) {
     }
   });
 }
-

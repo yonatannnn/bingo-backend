@@ -1,4 +1,4 @@
-import User from '../../models/User.model';
+import { createTransfer } from './walletService';
 
 export interface PendingTransfer {
   receiverReferralCode: string;
@@ -24,27 +24,9 @@ class TransferService {
     senderId: string,
     receiverId: string,
     amount: number
-  ): Promise<{ sender: any; receiver: any }> {
-    const sender = await User.findById(senderId);
-    const receiver = await User.findById(receiverId);
-
-    if (!sender || !receiver) {
-      throw new Error('User not found');
-    }
-
-    if (sender.balance < amount) {
-      throw new Error('Insufficient balance');
-    }
-
-    sender.balance -= amount;
-    receiver.balance += amount;
-
-    await sender.save();
-    await receiver.save();
-
-    return { sender, receiver };
+  ): Promise<{ senderBalance: number; receiverBalance: number }> {
+    return await createTransfer(senderId, receiverId, amount);
   }
 }
 
 export const transferService = new TransferService();
-

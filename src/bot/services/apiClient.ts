@@ -1,13 +1,19 @@
+// User API Interfaces
 interface UserResponse {
   id: string;
   telegram_id: number;
   first_name: string;
   last_name?: string;
-  phone: string;
-  balance: number;
-  demo_games: number;
-  referral_code: string;
+  phone_number: string;
+  referal_code: string; // Note: API uses "referal" not "referral"
   created_at: string;
+  updated_at: string;
+}
+
+interface WalletResponse {
+  user_id: string;
+  balance: number;
+  demo_balance: number;
   updated_at: string;
 }
 
@@ -16,17 +22,95 @@ interface RegisterRequest {
   first_name: string;
   last_name?: string;
   phone: string;
-  balance?: number;
-  demo_games?: number;
 }
 
 interface RegisterResponse {
   message: string;
   user: UserResponse;
+  wallet: WalletResponse;
 }
 
 interface GetUserResponse {
   user: UserResponse;
+}
+
+interface GetWalletResponse {
+  wallet: WalletResponse;
+}
+
+// Wallet API Interfaces
+interface DepositRequest {
+  user_id: string;
+  amount: number;
+  transaction_type: 'Telebirr' | 'CBE';
+  transaction_id: string;
+}
+
+interface DepositResponse {
+  message: string;
+  transaction: {
+    id: string;
+    user_id: string;
+    type: string;
+    amount: number;
+    status: string;
+    transaction_type: string;
+    transaction_id: string;
+    reference: string | null;
+    created_at: string;
+  };
+}
+
+interface WithdrawRequest {
+  user_id: string;
+  amount: number;
+}
+
+interface WithdrawResponse {
+  message: string;
+  transaction: {
+    id: string;
+    user_id: string;
+    type: string;
+    amount: number;
+    status: string;
+    transaction_type: string | null;
+    transaction_id: string | null;
+    reference: string | null;
+    created_at: string;
+  };
+}
+
+interface TransferRequest {
+  sender_id: string;
+  receiver_id: string;
+  amount: number;
+}
+
+interface TransferResponse {
+  message: string;
+  sender_tx: {
+    id: string;
+    user_id: string;
+    type: string;
+    amount: number;
+    status: string;
+    transaction_type: string | null;
+    transaction_id: string | null;
+    reference: string;
+    created_at: string;
+  };
+  receiver_tx: {
+    id: string;
+    user_id: string;
+    type: string;
+    amount: number;
+    status: string;
+    transaction_type: string | null;
+    transaction_id: string | null;
+    reference: string;
+    created_at: string;
+  };
 }
 
 interface ErrorResponse {
@@ -78,7 +162,8 @@ class ApiClient {
     }
   }
 
-  async registerUser(data: RegisterRequest): Promise<UserResponse> {
+  // User Endpoints
+  async registerUser(data: RegisterRequest): Promise<{ user: UserResponse; wallet: WalletResponse }> {
     const response: RegisterResponse = await this.request<RegisterResponse>(
       '/api/v1/user/register',
       {
@@ -86,7 +171,7 @@ class ApiClient {
         body: JSON.stringify(data),
       }
     );
-    return response.user;
+    return { user: response.user, wallet: response.wallet };
   }
 
   async getUserByTelegramId(telegramId: number): Promise<UserResponse | null> {
@@ -132,7 +217,51 @@ class ApiClient {
       throw error;
     }
   }
+
+  // Wallet Endpoints
+  async getWallet(userId: string): Promise<WalletResponse | null> {
+    try {
+      const response: GetWalletResponse = await this.request<GetWalletResponse>(
+        `/api/v1/wallet/${userId}`
+      );
+      return response.wallet;
+    } catch (error: any) {
+      if (error.message?.includes('404') || error.message?.includes('not found')) {
+        return null;
+      }
+      throw error;
+    }
+  }
+
+  async createDeposit(data: DepositRequest): Promise<DepositResponse> {
+    return await this.request<DepositResponse>(
+      '/api/v1/wallet/deposit',
+      {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }
+    );
+  }
+
+  async createWithdraw(data: WithdrawRequest): Promise<WithdrawResponse> {
+    return await this.request<WithdrawResponse>(
+      '/api/v1/wallet/withdraw',
+      {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }
+    );
+  }
+
+  async createTransfer(data: TransferRequest): Promise<TransferResponse> {
+    return await this.request<TransferResponse>(
+      '/api/v1/wallet/transfer',
+      {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }
+    );
+  }
 }
 
 export const apiClient = new ApiClient();
-
