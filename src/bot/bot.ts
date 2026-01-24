@@ -2,6 +2,7 @@ import TelegramBot from 'node-telegram-bot-api';
 import { Server } from 'socket.io';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
+import path from 'path';
 import User from '../models/User.model';
 import { generateReferralCode } from '../utils/referral';
 
@@ -37,7 +38,9 @@ export function initializeBot(io: Server) {
 
     // Send logo image if available, otherwise just text
     try {
-      await bot.sendPhoto(chatId, 'path/to/logo.png', {
+      // Get the image path relative to the backend root
+      const imagePath = path.join(__dirname, '../../asset/Gemini_Generated_Image_pqmjpgpqmjpgpqmj.png');
+      await bot.sendPhoto(chatId, imagePath, {
         caption: welcomeText,
         ...keyboard,
       });
