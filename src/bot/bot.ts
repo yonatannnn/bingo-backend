@@ -230,6 +230,62 @@ export function initializeBot(io: Server) {
     }
   });
 
+  // Withdraw command
+  bot.onText(/\/withdraw/, async (msg) => {
+    const chatId = msg.chat.id;
+
+    try {
+      const user = await User.findOne({ telegramId: chatId });
+      if (!user) {
+        await bot.sendMessage(chatId, '❌ Please register first using /register');
+        return;
+      }
+
+      // Step 1: Show balance and ask for withdrawal amount
+      await bot.sendMessage(
+        chatId,
+        `💰 የእርስዎ የአሁኑ ሂሳብ: ${user.balance} Birr\n\nእባክዎ ምን ያህል መልሶ ማውጣት ይፈልጋሉ?`,
+        {
+          reply_markup: {
+            force_reply: true,
+            input_field_placeholder: 'Enter amount to withdraw (e.g., 100)',
+          },
+        }
+      );
+    } catch (error) {
+      console.error('Withdraw command error:', error);
+      await bot.sendMessage(chatId, '❌ Error processing withdraw request. Please try again.');
+    }
+  });
+
+  // Transfer command
+  bot.onText(/\/transfer/, async (msg) => {
+    const chatId = msg.chat.id;
+
+    try {
+      const user = await User.findOne({ telegramId: chatId });
+      if (!user) {
+        await bot.sendMessage(chatId, '❌ Please register first using /register');
+        return;
+      }
+
+      // Step 1: Ask for referral code to transfer to
+      await bot.sendMessage(
+        chatId,
+        `💰 የእርስዎ የአሁኑ ሂሳብ: ${user.balance} Birr\n\nእባክዎ ለማስተላለፍ የሚፈልጉትን የተጠቃሚ Referral Code ያስገቡ:`,
+        {
+          reply_markup: {
+            force_reply: true,
+            input_field_placeholder: 'Enter Referral Code (e.g., 813d03b6)',
+          },
+        }
+      );
+    } catch (error) {
+      console.error('Transfer command error:', error);
+      await bot.sendMessage(chatId, '❌ Error processing transfer request. Please try again.');
+    }
+  });
+
   // Play command
   bot.onText(/\/play/, async (msg) => {
     const chatId = msg.chat.id;
@@ -404,12 +460,44 @@ export function initializeBot(io: Server) {
 
         case 'withdraw':
           await bot.answerCallbackQuery(query.id);
-          await bot.sendMessage(chatId, '💸 Withdraw feature coming soon!');
+          const withdrawUser = await User.findOne({ telegramId: chatId });
+          if (!withdrawUser) {
+            await bot.sendMessage(chatId, '❌ Please register first using /register');
+            return;
+          }
+
+          // Step 1: Show balance and ask for withdrawal amount
+          await bot.sendMessage(
+            chatId,
+            `💰 የእርስዎ የአሁኑ ሂሳብ: ${withdrawUser.balance} Birr\n\nእባክዎ ምን ያህል መልሶ ማውጣት ይፈልጋሉ?`,
+            {
+              reply_markup: {
+                force_reply: true,
+                input_field_placeholder: 'Enter amount to withdraw (e.g., 100)',
+              },
+            }
+          );
           break;
 
         case 'transfer':
           await bot.answerCallbackQuery(query.id);
-          await bot.sendMessage(chatId, '🔄 Transfer feature coming soon!');
+          const transferUser = await User.findOne({ telegramId: chatId });
+          if (!transferUser) {
+            await bot.sendMessage(chatId, '❌ Please register first using /register');
+            return;
+          }
+
+          // Step 1: Ask for referral code to transfer to
+          await bot.sendMessage(
+            chatId,
+            `💰 የእርስዎ የአሁኑ ሂሳብ: ${transferUser.balance} Birr\n\nእባክዎ ለማስተላለፍ የሚፈልጉትን የተጠቃሚ Referral Code ያስገቡ:`,
+            {
+              reply_markup: {
+                force_reply: true,
+                input_field_placeholder: 'Enter Referral Code (e.g., 813d03b6)',
+              },
+            }
+          );
           break;
 
         default:
@@ -496,6 +584,230 @@ export function initializeBot(io: Server) {
       } catch (error) {
         console.error('CBE deposit error:', error);
         await bot.sendMessage(chatId, '❌ Error processing deposit. Please try again.');
+      }
+      return;
+    }
+
+    // Check if it's a withdraw amount prompt
+    if (replyText.includes('ምን ያህል መልሶ ማውጣት') || replyText.includes('withdrawal amount') || replyText.includes('withdraw')) {
+      try {
+        const user = await User.findOne({ telegramId: chatId });
+        if (!user) {
+          await bot.sendMessage(chatId, '❌ User not found. Please register first.');
+          return;
+        }
+
+        // Validate and parse amount
+        const amount = parseFloat(text.trim());
+        if (isNaN(amount) || amount <= 0) {
+          await bot.sendMessage(chatId, '❌ Invalid amount. Please enter a valid number greater than 0.');
+          return;
+        }
+
+        // Check balance
+        if (user.balance < amount) {
+          await bot.sendMessage(
+            chatId,
+            `❌ Insufficient balance!\n\nYour current balance: ${user.balance} Birr\nRequested amount: ${amount} Birr`
+          );
+          return;
+        }
+
+        // Deduct balance
+        user.balance -= amount;
+        await user.save();
+
+        console.log(`💸 Withdrawal: User ${user.telegramId} withdrew ${amount} Birr. New balance: ${user.balance}`);
+
+        await bot.sendMessage(
+          chatId,
+          `✅ Withdrawal successful!\n\nAmount withdrawn: ${amount} Birr\nNew balance: ${user.balance} Birr\n\nእባክዎ ይጠብቁ... የእርስዎ ክፍያ እየተላከ ነው።`
+        );
+      } catch (error) {
+        console.error('Withdraw error:', error);
+        await bot.sendMessage(chatId, '❌ Error processing withdrawal. Please try again.');
+      }
+      return;
+    }
+
+  });
+
+  // Store pending transfers (simple in-memory store)
+  const pendingTransfers = new Map<number, { receiverReferralCode: string; receiverId: string }>();
+
+  // Enhanced message handler for withdraw and transfer flows
+  bot.on('message', async (msg) => {
+    const chatId = msg.chat.id;
+    const text = msg.text;
+    const replyToMessage = msg.reply_to_message;
+
+    // Skip if it's a command or not a reply
+    if (!text || !replyToMessage || text.startsWith('/')) {
+      return;
+    }
+
+    const replyText = replyToMessage.text || '';
+
+    // Handle withdraw amount entry
+    if (replyText.includes('ምን ያህል መልሶ ማውጣት') || replyText.includes('withdrawal amount') || (replyText.includes('withdraw') && replyText.includes('balance'))) {
+      try {
+        const user = await User.findOne({ telegramId: chatId });
+        if (!user) {
+          await bot.sendMessage(chatId, '❌ User not found. Please register first.');
+          return;
+        }
+
+        // Validate and parse amount
+        const amount = parseFloat(text.trim());
+        if (isNaN(amount) || amount <= 0) {
+          await bot.sendMessage(chatId, '❌ Invalid amount. Please enter a valid number greater than 0.');
+          return;
+        }
+
+        // Check balance
+        if (user.balance < amount) {
+          await bot.sendMessage(
+            chatId,
+            `❌ Insufficient balance!\n\nYour current balance: ${user.balance} Birr\nRequested amount: ${amount} Birr`
+          );
+          return;
+        }
+
+        // Deduct balance
+        user.balance -= amount;
+        await user.save();
+
+        console.log(`💸 Withdrawal: User ${user.telegramId} withdrew ${amount} Birr. New balance: ${user.balance}`);
+
+        await bot.sendMessage(
+          chatId,
+          `✅ Withdrawal successful!\n\nAmount withdrawn: ${amount} Birr\nNew balance: ${user.balance} Birr\n\nእባክዎ ይጠብቁ... የእርስዎ ክፍያ እየተላከ ነው።`
+        );
+      } catch (error) {
+        console.error('Withdraw error:', error);
+        await bot.sendMessage(chatId, '❌ Error processing withdrawal. Please try again.');
+      }
+      return;
+    }
+
+    // Handle transfer referral code entry
+    if (replyText.includes('Referral Code') && replyText.includes('ማስተላለፍ')) {
+      try {
+        const sender = await User.findOne({ telegramId: chatId });
+        if (!sender) {
+          await bot.sendMessage(chatId, '❌ User not found. Please register first.');
+          return;
+        }
+
+        const referralCode = text.trim();
+        
+        // Check if user exists with this referral code
+        const receiver = await User.findOne({ referralCode: referralCode });
+        if (!receiver) {
+          await bot.sendMessage(
+            chatId,
+            `❌ User not found!\n\nReferral Code "${referralCode}" does not exist. Please check and try again.`
+          );
+          return;
+        }
+
+        // Check if trying to transfer to self
+        if (receiver.telegramId === sender.telegramId) {
+          await bot.sendMessage(chatId, '❌ You cannot transfer to yourself!');
+          return;
+        }
+
+        // Store pending transfer
+        pendingTransfers.set(chatId, {
+          receiverReferralCode: referralCode,
+          receiverId: receiver._id.toString(),
+        });
+
+        await bot.sendMessage(
+          chatId,
+          `✅ User found!\n\nReceiver: ${receiver.firstName}\nPhone: ${receiver.phone}\n\nእባክዎ ምን ያህል መላል ይፈልጋሉ?\n\nYour balance: ${sender.balance} Birr`,
+          {
+            reply_markup: {
+              force_reply: true,
+              input_field_placeholder: `Enter amount to transfer`,
+            },
+          }
+        );
+      } catch (error) {
+        console.error('Transfer user lookup error:', error);
+        await bot.sendMessage(chatId, '❌ Error finding user. Please try again.');
+      }
+      return;
+    }
+
+    // Handle transfer amount entry
+    if (replyText.includes('ምን ያህል መላል') && (replyText.includes('Receiver') || replyText.includes('balance'))) {
+      try {
+        const sender = await User.findOne({ telegramId: chatId });
+        if (!sender) {
+          await bot.sendMessage(chatId, '❌ User not found. Please register first.');
+          return;
+        }
+
+        const pendingTransfer = pendingTransfers.get(chatId);
+        if (!pendingTransfer) {
+          await bot.sendMessage(chatId, '❌ Transfer session expired. Please start over.');
+          return;
+        }
+
+        // Validate and parse amount
+        const amount = parseFloat(text.trim());
+        if (isNaN(amount) || amount <= 0) {
+          await bot.sendMessage(chatId, '❌ Invalid amount. Please enter a valid number greater than 0.');
+          return;
+        }
+
+        // Check balance
+        if (sender.balance < amount) {
+          await bot.sendMessage(
+            chatId,
+            `❌ Insufficient balance!\n\nYour current balance: ${sender.balance} Birr\nRequested amount: ${amount} Birr`
+          );
+          pendingTransfers.delete(chatId);
+          return;
+        }
+
+        // Get receiver
+        const receiver = await User.findById(pendingTransfer.receiverId);
+        if (!receiver) {
+          await bot.sendMessage(chatId, '❌ Receiver not found. Please try again.');
+          pendingTransfers.delete(chatId);
+          return;
+        }
+
+        // Perform transfer
+        sender.balance -= amount;
+        receiver.balance += amount;
+        await sender.save();
+        await receiver.save();
+
+        pendingTransfers.delete(chatId);
+
+        console.log(`🔄 Transfer: ${sender.telegramId} → ${receiver.telegramId}, Amount: ${amount} Birr`);
+
+        await bot.sendMessage(
+          chatId,
+          `✅ Transfer successful!\n\nAmount: ${amount} Birr\nTo: ${receiver.firstName}\nYour new balance: ${sender.balance} Birr`
+        );
+
+        // Notify receiver
+        try {
+          await bot.sendMessage(
+            receiver.telegramId,
+            `💰 You received a transfer!\n\nAmount: ${amount} Birr\nFrom: ${sender.firstName}\nYour new balance: ${receiver.balance} Birr`
+          );
+        } catch (error) {
+          console.error('Error notifying receiver:', error);
+        }
+      } catch (error) {
+        console.error('Transfer error:', error);
+        await bot.sendMessage(chatId, '❌ Error processing transfer. Please try again.');
+        pendingTransfers.delete(chatId);
       }
       return;
     }
