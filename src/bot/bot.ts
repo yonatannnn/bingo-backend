@@ -208,22 +208,6 @@ export function initializeBot(io: Server) {
       };
 
       await bot.sendMessage(chatId, paymentMessage, paymentKeyboard);
-
-      // Send account details and instructions
-      const accountDetails = `📅 እባክዎ የደረሶትን Transaction ID ያስገቡ
-
-(Example:- CBE(Bank): FT25106S48WP)
-(Example:- Telebirr: CDF8QQMTVE)
-
-💵 ወደ ንግድ ባንክ ለማስገባት: 1000686060504
-📱 ወደ ቴሌብር ለማስገባት: 0978280042
-
-👉 ቁጥሮቹን Copy ለማድረግ እባኮትን የፅሁፍ አካላቸውን ያጫኑ።
-
-ከፍተኛ ማስገባት የሚቻለው = 1000 Birr
-ትንሹ ማስገባት ሚቻለው = 50 Birr`;
-
-      await bot.sendMessage(chatId, accountDetails);
     } catch (error) {
       console.error('Deposit command error:', error);
       await bot.sendMessage(chatId, '❌ Error processing deposit request. Please try again.');
@@ -412,50 +396,56 @@ export function initializeBot(io: Server) {
           };
 
           await bot.sendMessage(chatId, paymentMessage, paymentKeyboard);
+          break;
 
-          // Send account details and instructions
-          const accountDetails = `📅 እባክዎ የደረሶትን Transaction ID ያስገቡ
+        case 'deposit_telebirr':
+          await bot.answerCallbackQuery(query.id);
+          
+          // Send account details and instructions for Telebirr
+          const telebirrDetails = `📅 እባክዎ የደረሶትን Transaction ID ያስገቡ
 
-(Example:- CBE(Bank): FT25106S48WP)
 (Example:- Telebirr: CDF8QQMTVE)
 
-💵 ወደ ንግድ ባንክ ለማስገባት: 1000686060504
 📱 ወደ ቴሌብር ለማስገባት: 0978280042
 
 👉 ቁጥሮቹን Copy ለማድረግ እባኮትን የፅሁፍ አካላቸውን ያጫኑ።
 
 ከፍተኛ ማስገባት የሚቻለው = 1000 Birr
-ትንሹ ማስገባት ሚቻለው = 50 Birr`;
+ትንሹ ማስገባት ሚቻለው = 50 Birr
 
-          await bot.sendMessage(chatId, accountDetails);
-          break;
-
-        case 'deposit_telebirr':
-          await bot.answerCallbackQuery(query.id);
-          await bot.sendMessage(
-            chatId,
-            '📱 እባክዎ የቴሌብር Transaction ID ያስገቡ:\n\n(Example: CDF8QQMTVE)',
-            {
-              reply_markup: {
-                force_reply: true,
-                input_field_placeholder: 'Enter Telebirr Transaction ID',
-              },
-            }
-          );
+📱 እባክዎ የቴሌብር Transaction ID ያስገቡ:`;
+          
+          await bot.sendMessage(chatId, telebirrDetails, {
+            reply_markup: {
+              force_reply: true,
+              input_field_placeholder: 'Enter Telebirr Transaction ID',
+            },
+          });
           break;
 
         case 'deposit_cbe':
           await bot.answerCallbackQuery(query.id);
-          await bot.sendMessage(
-            chatId,
-            '🏦 እባክዎ የCBE Transaction ID ያስገቡ:\n\n(Example: FT25106S48WP)',
-            {
-              reply_markup: {
-                force_reply: true,
-                input_field_placeholder: 'Enter CBE Transaction ID',
-              },
-            }
-          );
+          
+          // Send account details and instructions for CBE
+          const cbeDetails = `📅 እባክዎ የደረሶትን Transaction ID ያስገቡ
+
+(Example:- CBE(Bank): FT25106S48WP)
+
+💵 ወደ ንግድ ባንክ ለማስገባት: 1000686060504
+
+👉 ቁጥሮቹን Copy ለማድረግ እባኮትን የፅሁፍ አካላቸውን ያጫኑ።
+
+ከፍተኛ ማስገባት የሚቻለው = 1000 Birr
+ትንሹ ማስገባት ሚቻለው = 50 Birr
+
+🏦 እባክዎ የCBE Transaction ID ያስገቡ:`;
+          
+          await bot.sendMessage(chatId, cbeDetails, {
+            reply_markup: {
+              force_reply: true,
+              input_field_placeholder: 'Enter CBE Transaction ID',
+            },
+          });
           break;
 
         case 'withdraw':
@@ -589,7 +579,7 @@ export function initializeBot(io: Server) {
     }
 
     // Check if it's a withdraw amount prompt
-    if (replyText.includes('ምን ያህል መልሶ ማውጣት') || replyText.includes('withdrawal amount') || replyText.includes('withdraw')) {
+    if (replyText.includes('ምን ያህል ማውጣት') || replyText.includes('withdrawal amount') || replyText.includes('withdraw')) {
       try {
         const user = await User.findOne({ telegramId: chatId });
         if (!user) {
