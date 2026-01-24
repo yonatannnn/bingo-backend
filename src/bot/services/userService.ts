@@ -1,18 +1,64 @@
-import User from '../../models/User.model';
-import { generateReferralCode } from '../../utils/referral';
+import { apiClient } from './apiClient';
 import { normalizePhoneNumber } from '../utils/validators';
 
-export async function findUserByTelegramId(telegramId: number) {
-  return await User.findOne({ telegramId });
+// Transform API response to match the expected format
+interface User {
+  _id: string;
+  telegramId: number;
+  firstName: string;
+  lastName?: string;
+  phone: string;
+  balance: number;
+  demoGames: number;
+  referralCode: string;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
-export async function findUserByPhone(phone: string) {
-  const normalizedPhone = normalizePhoneNumber(phone);
-  return await User.findOne({ phone: normalizedPhone });
+function transformApiUser(apiUser: any): User {
+  return {
+    _id: apiUser.id,
+    telegramId: apiUser.telegram_id,
+    firstName: apiUser.first_name,
+    lastName: apiUser.last_name,
+    phone: apiUser.phone,
+    balance: apiUser.balance,
+    demoGames: apiUser.demo_games,
+    referralCode: apiUser.referral_code,
+    createdAt: apiUser.created_at ? new Date(apiUser.created_at) : undefined,
+    updatedAt: apiUser.updated_at ? new Date(apiUser.updated_at) : undefined,
+  };
 }
 
-export async function findUserByReferralCode(referralCode: string) {
-  return await User.findOne({ referralCode });
+export async function findUserByTelegramId(telegramId: number): Promise<User | null> {
+  try {
+    const apiUser = await apiClient.getUserByTelegramId(telegramId);
+    return apiUser ? transformApiUser(apiUser) : null;
+  } catch (error) {
+    console.error('Error finding user by Telegram ID:', error);
+    return null;
+  }
+}
+
+export async function findUserByPhone(phone: string): Promise<User | null> {
+  try {
+    const normalizedPhone = normalizePhoneNumber(phone);
+    const apiUser = await apiClient.getUserByPhone(normalizedPhone);
+    return apiUser ? transformApiUser(apiUser) : null;
+  } catch (error) {
+    console.error('Error finding user by phone:', error);
+    return null;
+  }
+}
+
+export async function findUserByReferralCode(referralCode: string): Promise<User | null> {
+  try {
+    const apiUser = await apiClient.getUserByReferralCode(referralCode);
+    return apiUser ? transformApiUser(apiUser) : null;
+  } catch (error) {
+    console.error('Error finding user by referral code:', error);
+    return null;
+  }
 }
 
 export async function createUser(data: {
@@ -22,44 +68,29 @@ export async function createUser(data: {
   phone: string;
   balance?: number;
   demoGames?: number;
-}) {
+}): Promise<User> {
   const normalizedPhone = normalizePhoneNumber(data.phone);
-  const referralCode = await generateReferralCode();
   
-  const user = new User({
-    telegramId: data.telegramId,
-    firstName: data.firstName,
-    lastName: data.lastName,
+  const apiUser = await apiClient.registerUser({
+    telegram_id: data.telegramId,
+    first_name: data.firstName,
+    last_name: data.lastName,
     phone: normalizedPhone,
     balance: data.balance ?? 5,
-    demoGames: data.demoGames ?? 3,
-    referralCode,
+    demo_games: data.demoGames ?? 3,
   });
 
-  await user.save();
-  return user;
+  return transformApiUser(apiUser);
 }
 
-export async function updateUserBalance(userId: string, amount: number) {
-  const user = await User.findById(userId);
-  if (!user) {
-    throw new Error('User not found');
-  }
-  user.balance += amount;
-  await user.save();
-  return user;
+// Note: These functions still use direct DB access as they're not in the API yet
+// You may need to add API endpoints for these or handle them differently
+export async function updateUserBalance(userId: string, amount: number): Promise<User> {
+  // TODO: Implement via API when endpoint is available
+  throw new Error('updateUserBalance not yet implemented via API');
 }
 
-export async function deductUserBalance(userId: string, amount: number) {
-  const user = await User.findById(userId);
-  if (!user) {
-    throw new Error('User not found');
-  }
-  if (user.balance < amount) {
-    throw new Error('Insufficient balance');
-  }
-  user.balance -= amount;
-  await user.save();
-  return user;
+export async function deductUserBalance(userId: string, amount: number): Promise<User> {
+  // TODO: Implement via API when endpoint is available
+  throw new Error('deductUserBalance not yet implemented via API');
 }
-

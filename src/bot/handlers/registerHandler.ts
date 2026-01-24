@@ -1,5 +1,4 @@
 import TelegramBot from 'node-telegram-bot-api';
-import mongoose from 'mongoose';
 import { findUserByTelegramId, findUserByPhone, createUser } from '../services/userService';
 import { getContactKeyboard } from '../utils/keyboards';
 import { MESSAGES } from '../utils/messages';
@@ -72,29 +71,22 @@ export function setupRegisterHandler(bot: TelegramBot) {
 
       let errorMessage = MESSAGES.ERROR_REGISTRATION;
       
-      if (error.code === 11000) {
-        if (error.keyPattern?.telegramId) {
-          errorMessage = '❌ This Telegram account is already registered.';
-        } else if (error.keyPattern?.phone) {
-          errorMessage = '❌ This phone number is already registered.';
-        } else if (error.keyPattern?.referralCode) {
-          errorMessage = '❌ Referral code conflict. Please try again.';
-        } else if (error.keyPattern?.email) {
-          console.log('⚠️  Email index conflict detected, attempting to fix...');
-          try {
-            if (mongoose.connection.db) {
-              await mongoose.connection.db.collection('users').dropIndex('email_1');
-              console.log('✅ Dropped email index, user should retry registration');
-              errorMessage = '❌ Registration failed due to database issue. Please try again in a moment.';
-            } else {
-              errorMessage = '❌ Registration failed. Please contact support.';
-            }
-          } catch (dropError) {
-            errorMessage = '❌ Registration failed. Please contact support.';
+      // Handle API errors
+      if (error.message) {
+        const errorMsg = error.message.toLowerCase();
+        if (errorMsg.includes('already registered') || errorMsg.includes('duplicate') || errorMsg.includes('exists')) {
+          if (errorMsg.includes('telegram')) {
+            errorMessage = '❌ This Telegram account is already registered.';
+          } else if (errorMsg.includes('phone')) {
+            errorMessage = '❌ This phone number is already registered.';
+          } else {
+            errorMessage = '❌ User already exists. Please try again.';
           }
+        } else if (errorMsg.includes('validation') || errorMsg.includes('invalid')) {
+          errorMessage = `❌ Validation error: ${error.message}`;
+        } else if (errorMsg.includes('network') || errorMsg.includes('fetch')) {
+          errorMessage = '❌ Network error. Please check your connection and try again.';
         }
-      } else if (error.name === 'ValidationError') {
-        errorMessage = `❌ Validation error: ${Object.values(error.errors).map((e: any) => e.message).join(', ')}`;
       }
 
       await bot.sendMessage(chatId, errorMessage);
