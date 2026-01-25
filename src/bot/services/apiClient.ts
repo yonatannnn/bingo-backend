@@ -121,7 +121,7 @@ class ApiClient {
   private baseUrl: string;
 
   constructor() {
-    this.baseUrl = process.env.API_BASE_URL || 'http://localhost:8000';
+    this.baseUrl = process.env.API_BASE_URL || 'http://localhost:8080';
     // Remove trailing slash if present
     this.baseUrl = this.baseUrl.replace(/\/+$/, '');
   }

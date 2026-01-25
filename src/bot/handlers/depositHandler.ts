@@ -5,6 +5,7 @@ import { depositService } from '../services/depositService';
 import { getPaymentMethodKeyboard, getForceReplyKeyboard } from '../utils/keyboards';
 import { MESSAGES } from '../utils/messages';
 import { validateTransactionId, validateAmount } from '../utils/validators';
+import { DEPOSIT_CONFIG } from '../config/depositConfig';
 
 export function setupDepositHandler(bot: TelegramBot) {
   // Deposit command
@@ -38,8 +39,9 @@ export function setupDepositHandler(bot: TelegramBot) {
     const replyText = replyToMessage.text || '';
 
     // Handle deposit amount entry (after payment method selection)
-    if (replyText.includes('እባክዎ ምን ያህል መጠቀም') || 
-        (replyText.includes('Payment Method') && replyText.includes('እባክዎ የክፍያ መጠን'))) {
+    if (replyText.includes('ማስገባት የሚፈልጉትን') || 
+        replyText.includes('እባክዎ ምን ያህል መጠቀም') || 
+        (replyText.includes('Payment Method') && replyText.includes('የገንዘብ መጠን'))) {
       try {
         const user = await findUserByTelegramId(chatId);
         if (!user) {
@@ -62,11 +64,11 @@ export function setupDepositHandler(bot: TelegramBot) {
 
         const amount = amountValidation.value!;
 
-        // Validate amount range (50-1000)
-        if (amount < 50 || amount > 1000) {
+        // Validate amount range using config
+        if (amount < DEPOSIT_CONFIG.MIN_AMOUNT || amount > DEPOSIT_CONFIG.MAX_AMOUNT) {
           await bot.sendMessage(
             chatId,
-            '❌ Invalid amount. Minimum is 50 Birr and maximum is 1000 Birr.'
+            `❌ Invalid amount. Minimum is ${DEPOSIT_CONFIG.MIN_AMOUNT} Birr and maximum is ${DEPOSIT_CONFIG.MAX_AMOUNT} Birr.`
           );
           return;
         }
@@ -81,13 +83,13 @@ export function setupDepositHandler(bot: TelegramBot) {
         if (pendingDeposit.transactionType === 'Telebirr') {
           await bot.sendMessage(
             chatId,
-            MESSAGES.TELEBIRR_DETAILS(amount),
+            MESSAGES.TELEBIRR_DETAILS(amount, DEPOSIT_CONFIG.TELEBIRR_ACCOUNT),
             getForceReplyKeyboard('Enter Telebirr Transaction ID')
           );
         } else if (pendingDeposit.transactionType === 'CBE') {
           await bot.sendMessage(
             chatId,
-            MESSAGES.CBE_DETAILS(amount),
+            MESSAGES.CBE_DETAILS(amount, DEPOSIT_CONFIG.CBE_ACCOUNT),
             getForceReplyKeyboard('Enter CBE Transaction ID')
           );
         }

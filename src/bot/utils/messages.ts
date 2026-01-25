@@ -3,9 +3,9 @@ export const MESSAGES = {
   REGISTER_PROMPT: 'Please share your contact information to register.',
   ALREADY_REGISTERED: '❌ You are already registered! Please use /play to start playing.',
   PHONE_ALREADY_REGISTERED: '❌ This phone number is already registered with another account.',
-  REGISTRATION_SUCCESS: (firstName: string, phone: string, balance: number, demoGames: number, referralCode: string) =>
+  REGISTRATION_SUCCESS: (firstName: string, lastName: string, phone: string, balance: number, demoGames: number, referralCode: string) =>
     `✅ Registration successful!\n\n` +
-    `Name: ${firstName}\n` +
+    `Name: ${firstName} ${lastName}\n` +
     `Phone: ${phone}\n` +
     `Balance: ${balance}\n` +
     `Demo Games: ${demoGames}\n` +
@@ -15,30 +15,25 @@ export const MESSAGES = {
   OPERATION_CANCELLED: '✅ Operation cancelled. You can start fresh!',
   GAME_PROMPT: '🎮 Choose your game mode!',
   PAYMENT_METHOD_PROMPT: 'እባክዎ የሚጠቀሙትን የክፍያ እማራጭ ይምረጡ (Telebirr ወይም Commercial Bank of Ethiopia)',
-  DEPOSIT_AMOUNT_PROMPT: (transactionType: string) =>
-    `💰 እባክዎ ምን ያህል መጠቀም ይፈልጋሉ?\n\n` +
+  DEPOSIT_AMOUNT_PROMPT: (transactionType: string, minAmount: number, maxAmount: number) =>
     `Payment Method: ${transactionType}\n\n` +
-    `ከፍተኛ ማስገባት የሚቻለው = 1000 Birr\n` +
-    `ትንሹ ማስገባት ሚቻለው = 50 Birr\n\n` +
-    `እባክዎ የክፍያ መጠን ያስገቡ:`,
-  TELEBIRR_DETAILS: (amount: number) => `📅 እባክዎ የደረሶትን Transaction ID ያስገቡ
-
-Amount: ${amount} Birr
+    `ከፍተኛ ማስገባት የሚቻለው = ${maxAmount} Birr\n` +
+    `ትንሹ ማስገባት ሚቻለው = ${minAmount} Birr\n\n` +
+    `ማስገባት የሚፈልጉትን የገንዘብ መጠን ያስገቡ።`,
+  TELEBIRR_DETAILS: (amount: number, accountNumber: string) => `Amount: ${amount} Birr
 
 (Example:- Telebirr: CDF8QQMTVE)
 
-📱 ወደ ቴሌብር ለማስገባት: -77280042
+📱 ወደ ቴሌብር ለማስገባት: ${accountNumber}
 
 👉 ቁጥሮቹን Copy ለማድረግ እባኮትን የፅሁፍ አካላቸውን ያጫኑ።
 
 📱 እባክዎ የቴሌብር Transaction ID ያስገቡ:`,
-  CBE_DETAILS: (amount: number) => `📅 እባክዎ የደረሶትን Transaction ID ያስገቡ
-
-Amount: ${amount} Birr
+  CBE_DETAILS: (amount: number, accountNumber: string) => `Amount: ${amount} Birr
 
 (Example:- CBE(Bank): FT25106S48WP)
 
-💵 ወደ ንግድ ባንክ ለማስገባት: 100000000000
+💵 ወደ ንግድ ባንክ ለማስገባት: ${accountNumber}
 
 👉 ቁጥሮቹን Copy ለማድረግ እባኮትን የፅሁፍ አካላቸውን ያጫኑ።
 
@@ -47,14 +42,14 @@ Amount: ${amount} Birr
     `✅ የቴሌብር Transaction ID ተቀብሏል!\n\n` +
     `Amount: ${amount} Birr\n` +
     `Transaction ID: ${transactionId}\n\n` +
-    `እባክዎ ይጠብቁ... የእርስዎ ክፍያ እየተፈተሸ ነው።\n\n` +
-    `የክፍያዎ ከተፈተሸ በኋላ ወደ ሂሳብዎ ይጨመራል።`,
+    `እባክዎ ትንሽ ይጠብቁ፤ ክፍያዎ እየተረጋገጠ ነው።\n\n` +
+    `ክፍያዎ ከተረጋገጠ በኋላ ወደ ሂሳብዎ ይጨመራል።`,
   CBE_TRANSACTION_RECEIVED: (amount: number, transactionId: string) =>
     `✅ የCBE Transaction ID ተቀብሏል!\n\n` +
     `Amount: ${amount} Birr\n` +
     `Transaction ID: ${transactionId}\n\n` +
-    `እባክዎ ይጠብቁ... የእርስዎ ክፍያ እየተፈተሸ ነው።\n\n` +
-    `የክፍያዎ ከተፈተሸ በኋላ ወደ ሂሳብዎ ይጨመራል።`,
+    `እባክዎ ትንሽ ይጠብቁ፤ ክፍያዎ እየተረጋገጠ ነው።\n\n` +
+    `ክፍያዎ ከተረጋገጠ በኋላ ወደ ሂሳብዎ ይጨመራል።`,
   DEPOSIT_SESSION_EXPIRED: '❌ Deposit session expired. Please start over.',
   WITHDRAW_BALANCE_PROMPT: (balance: number) =>
     `💰 የእርስዎ የአሁኑ ሂሳብ: ${balance} Birr\n\n` +

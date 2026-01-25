@@ -46,10 +46,11 @@ export function setupRegisterHandler(bot: TelegramBot) {
 
       const successMessage = MESSAGES.REGISTRATION_SUCCESS(
         user.firstName,
+        user.lastName ?? '',
         user.phone,
         user.balance,
-        user.demoGames,
-        user.referralCode
+        user.demoGames ?? 0,
+        user.referralCode ?? ''
       );
 
       await bot.sendMessage(chatId, successMessage);

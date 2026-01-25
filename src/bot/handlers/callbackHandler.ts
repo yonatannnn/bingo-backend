@@ -3,6 +3,7 @@ import { findUserByTelegramId } from '../services/userService';
 import { depositService } from '../services/depositService';
 import { getContactKeyboard, getPaymentMethodKeyboard, getGameKeyboard, getForceReplyKeyboard } from '../utils/keyboards';
 import { MESSAGES } from '../utils/messages';
+import { DEPOSIT_CONFIG } from '../config/depositConfig';
 
 export function setupCallbackHandler(bot: TelegramBot) {
   bot.on('callback_query', async (query) => {
@@ -49,8 +50,8 @@ export function setupCallbackHandler(bot: TelegramBot) {
           // Ask for amount first
           await bot.sendMessage(
             chatId,
-            MESSAGES.DEPOSIT_AMOUNT_PROMPT('Telebirr'),
-            getForceReplyKeyboard('Enter amount (50-1000 Birr)')
+            MESSAGES.DEPOSIT_AMOUNT_PROMPT('Telebirr', DEPOSIT_CONFIG.MIN_AMOUNT, DEPOSIT_CONFIG.MAX_AMOUNT),
+            getForceReplyKeyboard(`Enter amount (${DEPOSIT_CONFIG.MIN_AMOUNT}-${DEPOSIT_CONFIG.MAX_AMOUNT} Birr)`)
           );
           break;
 
@@ -63,8 +64,8 @@ export function setupCallbackHandler(bot: TelegramBot) {
           // Ask for amount first
           await bot.sendMessage(
             chatId,
-            MESSAGES.DEPOSIT_AMOUNT_PROMPT('CBE'),
-            getForceReplyKeyboard('Enter amount (50-1000 Birr)')
+            MESSAGES.DEPOSIT_AMOUNT_PROMPT('CBE', DEPOSIT_CONFIG.MIN_AMOUNT, DEPOSIT_CONFIG.MAX_AMOUNT),
+            getForceReplyKeyboard(`Enter amount (${DEPOSIT_CONFIG.MIN_AMOUNT}-${DEPOSIT_CONFIG.MAX_AMOUNT} Birr)`)
           );
           break;
 

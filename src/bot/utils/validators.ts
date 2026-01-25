@@ -4,10 +4,13 @@ export const validateTransactionId = (transactionId: string): boolean => {
 };
 
 export const validateAmount = (amount: string): { valid: boolean; value?: number; error?: string } => {
-  const parsed = parseFloat(amount.trim());
+  // Remove "Birr" if present (case insensitive, with optional space)
+  const cleaned = amount.trim().replace(/\s*birr\s*$/i, '').trim();
+  
+  const parsed = parseFloat(cleaned);
   
   if (isNaN(parsed) || parsed <= 0) {
-    return { valid: false, error: 'Invalid amount. Please enter a valid number greater than 0.' };
+    return { valid: false, error: 'Invalid amount. Please enter a valid number (e.g., 100 or 100 Birr).' };
   }
   
   return { valid: true, value: parsed };
