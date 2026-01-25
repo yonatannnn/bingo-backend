@@ -25,6 +25,24 @@ export async function getWallet(userId: string): Promise<Wallet | null> {
   }
 }
 
+export async function getWalletByTelegramId(telegramId: number): Promise<Wallet | null> {
+  try {
+    const wallet = await apiClient.getWalletByTelegramId(telegramId);
+    if (!wallet) {
+      return null;
+    }
+    return {
+      userId: wallet.user_id,
+      balance: wallet.balance,
+      demoBalance: wallet.demo_balance,
+      updatedAt: new Date(wallet.updated_at),
+    };
+  } catch (error) {
+    console.error('Error getting wallet by Telegram ID:', error);
+    return null;
+  }
+}
+
 export async function createDeposit(
   userId: string,
   amount: number,

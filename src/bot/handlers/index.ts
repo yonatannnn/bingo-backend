@@ -6,4 +6,5 @@ export { setupWithdrawHandler } from './withdrawHandler';
 export { setupTransferHandler } from './transferHandler';
 export { setupCancelHandler } from './cancelHandler';
 export { setupCallbackHandler } from './callbackHandler';
+export { setupBalanceHandler } from './balanceHandler';
 

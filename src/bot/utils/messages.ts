@@ -51,6 +51,10 @@ export const MESSAGES = {
     `እባክዎ ትንሽ ይጠብቁ፤ ክፍያዎ እየተረጋገጠ ነው።\n\n` +
     `ክፍያዎ ከተረጋገጠ በኋላ ወደ ሂሳብዎ ይጨመራል።`,
   DEPOSIT_SESSION_EXPIRED: '❌ Deposit session expired. Please start over.',
+  BALANCE_INFO: (balance: number, demoBalance: number) =>
+    `💰 የእርስዎ የአሁኑ ሂሳብ\n\n` +
+    `Balance: ${balance} Birr\n` +
+    `Demo Balance: ${demoBalance} Birr`,
   WITHDRAW_BALANCE_PROMPT: (balance: number) =>
     `💰 የእርስዎ የአሁኑ ሂሳብ: ${balance} Birr\n\n` +
     `እባክዎ ምን ያህል መልሶ ማውጣት ይፈልጋሉ?`,

@@ -9,7 +9,7 @@ export const DEPOSIT_CONFIG = {
   MAX_AMOUNT: 1000, // Maximum deposit amount in Birr
 
   // Payment account numbers
-  TELEBIRR_ACCOUNT: '-77280042', // Telebirr account number for deposits
+  TELEBIRR_ACCOUNT: '77280042', // Telebirr account number for deposits
   CBE_ACCOUNT: '100000000000', // CBE (Commercial Bank of Ethiopia) account number for deposits
 };
 

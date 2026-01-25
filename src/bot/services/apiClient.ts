@@ -233,6 +233,20 @@ class ApiClient {
     }
   }
 
+  async getWalletByTelegramId(telegramId: number): Promise<WalletResponse | null> {
+    try {
+      const response: GetWalletResponse = await this.request<GetWalletResponse>(
+        `/api/v1/wallet/telegram/${telegramId}`
+      );
+      return response.wallet;
+    } catch (error: any) {
+      if (error.message?.includes('404') || error.message?.includes('not found')) {
+        return null;
+      }
+      throw error;
+    }
+  }
+
   async createDeposit(data: DepositRequest): Promise<DepositResponse> {
     return await this.request<DepositResponse>(
       '/api/v1/wallet/deposit',

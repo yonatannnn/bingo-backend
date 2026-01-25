@@ -11,6 +11,7 @@ import { setupWithdrawHandler } from './handlers/withdrawHandler';
 import { setupTransferHandler } from './handlers/transferHandler';
 import { setupCancelHandler } from './handlers/cancelHandler';
 import { setupCallbackHandler } from './handlers/callbackHandler';
+import { setupBalanceHandler } from './handlers/balanceHandler';
 
 dotenv.config();
 
@@ -33,6 +34,7 @@ export function initializeBot(io: Server) {
   setupTransferHandler(bot);
   setupCancelHandler(bot);
   setupCallbackHandler(bot);
+  setupBalanceHandler(bot);
 
   console.log('✅ Telegram bot initialized');
   return bot;
