@@ -1,16 +1,34 @@
 import crypto from 'crypto';
-import User from '../models/User.model';
+import { apiClient } from '../bot/services/apiClient';
 
+/**
+ * Generate a unique referral code
+ * Checks against external API to ensure uniqueness
+ */
 export async function generateReferralCode(): Promise<string> {
   let code: string;
   let exists = true;
+  let attempts = 0;
+  const maxAttempts = 10; // Prevent infinite loop
 
-  while (exists) {
+  while (exists && attempts < maxAttempts) {
     code = crypto.randomBytes(4).toString('hex');
-    const user = await User.findOne({ referralCode: code });
-    exists = !!user;
+    
+    // Check if code exists in external API
+    try {
+      const user = await apiClient.getUserByReferralCode(code);
+      exists = !!user;
+    } catch (error) {
+      // If API error (like 404), code doesn't exist
+      exists = false;
+    }
+    
+    attempts++;
+  }
+
+  if (attempts >= maxAttempts) {
+    throw new Error('Failed to generate unique referral code after multiple attempts');
   }
 
   return code!;
 }
-

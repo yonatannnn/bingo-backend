@@ -3,11 +3,9 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
-import mongoose from 'mongoose';
 import { initializeBot } from './bot/bot';
 import { setupWebSocket } from './websocket/websocket';
 import gameRoutes from './routes/game.routes';
-import userRoutes from './routes/user.routes';
 
 dotenv.config();
 
@@ -80,56 +78,28 @@ app.use((req, res, next) => {
 
 // Routes
 app.use('/api/game', gameRoutes);
-app.use('/api/user', userRoutes);
 
 // Health check
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-// Initialize MongoDB
-mongoose
-  .connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/trial-bingo')
-  .then(async () => {
-    console.log('✅ Connected to MongoDB');
-    
-    // Drop email index if it exists (from previous schema)
-    try {
-      const db = mongoose.connection.db;
-      if (db) {
-        await db.collection('users').dropIndex('email_1').catch(() => {
-          // Index doesn't exist, ignore
-        });
-        console.log('✅ Cleaned up email index');
-      }
-    } catch (error) {
-      // Ignore errors
-    }
-    
-    // Initialize cards if needed
-    const { initializeCards } = await import('./game/cardGenerator');
-    await initializeCards();
-    
-    // Setup WebSocket first
-    setupWebSocket(io);
-    
-    // Set IO instance for game engine
-    const { setIOInstance } = await import('./game/gameEngine');
-    setIOInstance(io);
-    
-    // Initialize Telegram Bot
-    initializeBot(io);
-    
-    // Start server
-    const PORT = process.env.PORT || 3000;
-    httpServer.listen(PORT, () => {
-      console.log(`🚀 Server running on port ${PORT}`);
-    });
-  })
-  .catch((error) => {
-    console.error('❌ MongoDB connection error:', error);
-    process.exit(1);
-  });
+// Start server immediately (no MongoDB connection needed)
+const PORT = process.env.PORT || 3000;
+
+// Setup WebSocket
+setupWebSocket(io);
+
+// NOTE: Game engine removed - game operations should be handled by external API
+
+// Initialize Telegram Bot
+initializeBot(io);
+
+// Start server
+httpServer.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`✅ Telegram bot initialized`);
+  console.log(`⚠️  Note: Using external API for all data operations`);
+});
 
 export { io };
-

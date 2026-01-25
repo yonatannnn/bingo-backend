@@ -1,6 +1,4 @@
 import { Server } from 'socket.io';
-import Game from '../models/Game.model';
-import { getGameEngine } from '../game/gameEngine';
 
 export function setupWebSocket(io: Server) {
   io.on('connection', (socket) => {
@@ -12,16 +10,15 @@ export function setupWebSocket(io: Server) {
       socket.join(`game-${gameId}`);
       console.log(`User ${userId} joined game ${gameId}`);
 
-      // Send current game state
-      const game = await Game.findById(gameId);
-      if (game) {
-        socket.emit('game-state', {
-          gameId,
-          status: game.status,
-          drawnNumbers: game.drawnNumbers,
-          players: game.players.length,
-        });
-      }
+      // NOTE: Game state should be fetched from external API
+      // For now, send a placeholder response
+      socket.emit('game-state', {
+        gameId,
+        status: 'waiting',
+        drawnNumbers: [],
+        players: 0,
+        message: 'Game state requires external API implementation',
+      });
     });
 
     // Leave game room
@@ -38,13 +35,9 @@ export function setupWebSocket(io: Server) {
       cardId: number;
       number: number;
     }) => {
-      try {
-        const { gameId, userId, cardId, number } = data;
-        const engine = getGameEngine(gameId);
-        await engine.markNumber(userId, cardId, number);
-      } catch (error) {
-        socket.emit('error', { message: 'Failed to mark number' });
-      }
+      socket.emit('error', { 
+        message: 'Game operations require external API implementation. Please implement game endpoints in your external API.' 
+      });
     });
 
     // Claim bingo
@@ -53,35 +46,16 @@ export function setupWebSocket(io: Server) {
       userId: string;
       cardId: number;
     }) => {
-      try {
-        const { gameId, userId, cardId } = data;
-        const engine = getGameEngine(gameId);
-        const result = await engine.checkPlayerWin(userId, cardId);
-
-        if (result.hasWon) {
-          socket.emit('bingo-valid', {
-            message: result.message,
-            pattern: result.pattern,
-          });
-        } else {
-          socket.emit('bingo-invalid', {
-            message: result.message || 'Invalid bingo',
-          });
-        }
-      } catch (error) {
-        socket.emit('error', { message: 'Failed to check bingo' });
-      }
+      socket.emit('error', { 
+        message: 'Game operations require external API implementation. Please implement game endpoints in your external API.' 
+      });
     });
 
     // Start game (when countdown ends or player clicks start)
     socket.on('start-game', async (data: { gameId: string }) => {
-      try {
-        const { gameId } = data;
-        const engine = getGameEngine(gameId);
-        await engine.startGame();
-      } catch (error) {
-        socket.emit('error', { message: 'Failed to start game' });
-      }
+      socket.emit('error', { 
+        message: 'Game operations require external API implementation. Please implement game endpoints in your external API.' 
+      });
     });
 
     socket.on('disconnect', () => {
@@ -89,6 +63,5 @@ export function setupWebSocket(io: Server) {
     });
   });
 
-  console.log('✅ WebSocket server initialized');
+  console.log('✅ WebSocket server initialized (game operations require external API)');
 }
-
