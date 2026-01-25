@@ -57,12 +57,11 @@ export const MESSAGES = {
     `Demo Balance: ${demoBalance} Birr`,
   WITHDRAW_BALANCE_PROMPT: (balance: number) =>
     `💰 የእርስዎ የአሁኑ ሂሳብ: ${balance} Birr\n\n` +
-    `እባክዎ ምን ያህል መልሶ ማውጣት ይፈልጋሉ?`,
+    `ምን ያህል  ማውጣት ይፈልጋሉ?`,
   WITHDRAW_SUCCESS: (amount: number, newBalance: number) =>
-    `✅ Withdrawal successful!\n\n` +
     `Amount withdrawn: ${amount} Birr\n` +
     `New balance: ${newBalance} Birr\n\n` +
-    `እባክዎ ይጠብቁ... የእርስዎ ክፍያ እየተላከ ነው።`,
+    `የመውጫ ክፍያዎ እየተፀደቀ ነው፤ እባክዎ ይጠብቁ።`,
   TRANSFER_REFERRAL_PROMPT: (balance: number) =>
     `💰 የእርስዎ የአሁኑ ሂሳብ: ${balance} Birr\n\n` +
     `እባክዎ ለማስተላለፍ የሚፈልጉትን የተጠቃሚ Referral Code ያስገቡ:`,

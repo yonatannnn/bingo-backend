@@ -40,11 +40,14 @@ export function setupWithdrawHandler(bot: TelegramBot) {
 
     const replyText = replyToMessage.text || '';
     
-    if (replyText.includes('ምን ያህል መልሶ ማውጣት') || 
+    if (replyText.includes('ምን ያህል') && replyText.includes('ማውጣት') || 
         replyText.includes('withdrawal amount') || 
         (replyText.includes('withdraw') && replyText.includes('balance'))) {
+      let user: any = null;
+      let amount: number | undefined = undefined;
+      
       try {
-        const user = await findUserByTelegramId(chatId);
+        user = await findUserByTelegramId(chatId);
         if (!user) {
           await bot.sendMessage(chatId, MESSAGES.USER_NOT_FOUND);
           return;
@@ -56,7 +59,7 @@ export function setupWithdrawHandler(bot: TelegramBot) {
           return;
         }
 
-        const amount = amountValidation.value!;
+        amount = amountValidation.value!;
 
         // Check balance (API will also check, but we check first for better UX)
         if (user.balance < amount) {
@@ -71,6 +74,14 @@ export function setupWithdrawHandler(bot: TelegramBot) {
         await bot.sendMessage(chatId, MESSAGES.WITHDRAW_SUCCESS(amount, result.newBalance));
       } catch (error: any) {
         console.error('Withdraw error:', error);
+        console.error('Error details:', {
+          message: error.message,
+          stack: error.stack,
+          userId: user?._id,
+          amount,
+          chatId,
+        });
+        
         const errorMsg = error.message?.toLowerCase() || '';
         let errorMessage = MESSAGES.ERROR_WITHDRAW;
         
@@ -78,6 +89,10 @@ export function setupWithdrawHandler(bot: TelegramBot) {
           errorMessage = MESSAGES.INSUFFICIENT_BALANCE(0, 0);
         } else if (errorMsg.includes('invalid amount')) {
           errorMessage = MESSAGES.INVALID_AMOUNT;
+        } else if (errorMsg.includes('check constraint') || errorMsg.includes('transaction_type')) {
+          // Database constraint violation - likely an issue with the external API
+          errorMessage = '❌ Withdrawal failed due to a server error. Please contact support.';
+          console.error('⚠️ Database constraint violation detected. This is likely an issue with the external API backend.');
         }
         
         await bot.sendMessage(chatId, errorMessage);

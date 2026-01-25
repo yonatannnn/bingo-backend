@@ -17,13 +17,24 @@ dotenv.config();
 
 let bot: TelegramBot;
 
-export function initializeBot(io: Server) {
+export async function initializeBot(io: Server) {
   const token = process.env.TELEGRAM_BOT_TOKEN;
   if (!token) {
     throw new Error('TELEGRAM_BOT_TOKEN is not set');
   }
 
   bot = new TelegramBot(token, { polling: true });
+
+  // Set bot commands menu
+  await bot.setMyCommands([
+    { command: 'register', description: 'Register to Play' },
+    { command: 'withdraw', description: 'Make a Withdrawal' },
+    { command: 'deposit', description: 'Make a Deposit' },
+    { command: 'transfer', description: 'Transfer for a Friend' },
+    { command: 'checkbalance', description: 'Check Your Balance' },
+    { command: 'play', description: 'Start Playing' },
+    { command: 'cancel', description: 'Cancel Current Operation' },
+  ]);
 
   // Setup all handlers
   setupStartHandler(bot);

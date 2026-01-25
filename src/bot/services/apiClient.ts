@@ -150,7 +150,14 @@ class ApiClient {
             error: `HTTP ${response.status}: ${response.statusText}`,
           };
         }
-        throw new Error(errorData.error || `HTTP ${response.status}`);
+        const errorMessage = errorData.error || `HTTP ${response.status}`;
+        console.error(`API Error [${response.status}]:`, {
+          endpoint,
+          method: options.method || 'GET',
+          error: errorMessage,
+          url,
+        });
+        throw new Error(errorMessage);
       }
 
       return await response.json() as T;

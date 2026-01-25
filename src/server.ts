@@ -93,7 +93,10 @@ setupWebSocket(io);
 // NOTE: Game engine removed - game operations should be handled by external API
 
 // Initialize Telegram Bot
-initializeBot(io);
+initializeBot(io).catch((error) => {
+  console.error('Failed to initialize bot:', error);
+  process.exit(1);
+});
 
 // Start server
 httpServer.listen(PORT, () => {
