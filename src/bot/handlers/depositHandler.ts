@@ -8,8 +8,8 @@ import { validateTransactionId, validateAmount } from '../utils/validators';
 import { DEPOSIT_CONFIG } from '../config/depositConfig';
 
 export function setupDepositHandler(bot: TelegramBot) {
-  // Deposit command
-  bot.onText(/\/deposit/, async (msg) => {
+  // Deposit command - match exactly /deposit (not /deposit_history)
+  bot.onText(/^\/deposit$/, async (msg) => {
     const chatId = msg.chat.id;
 
     try {

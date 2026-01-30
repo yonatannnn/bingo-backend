@@ -6,8 +6,8 @@ import { MESSAGES } from '../utils/messages';
 import { validateAmount } from '../utils/validators';
 
 export function setupTransferHandler(bot: TelegramBot) {
-  // Transfer command
-  bot.onText(/\/transfer/, async (msg) => {
+  // Transfer command - match exactly /transfer (not /transfer_history)
+  bot.onText(/^\/transfer$/, async (msg) => {
     const chatId = msg.chat.id;
 
     try {

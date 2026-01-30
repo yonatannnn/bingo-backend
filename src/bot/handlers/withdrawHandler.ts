@@ -6,8 +6,8 @@ import { MESSAGES } from '../utils/messages';
 import { validateAmount } from '../utils/validators';
 
 export function setupWithdrawHandler(bot: TelegramBot) {
-  // Withdraw command
-  bot.onText(/\/withdraw/, async (msg) => {
+  // Withdraw command - match exactly /withdraw (not /withdrawal_history)
+  bot.onText(/^\/withdraw$/, async (msg) => {
     const chatId = msg.chat.id;
 
     try {
