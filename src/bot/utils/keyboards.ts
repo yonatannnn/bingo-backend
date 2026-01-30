@@ -84,3 +84,34 @@ export const getSupportKeyboard = (supportUsernames: string[]): SendMessageOptio
   };
 };
 
+export const getJoinChannelKeyboard = (channelUsername: string): SendMessageOptions => {
+  const cleanUsername = channelUsername.replace(/^@/, '');
+  return {
+    reply_markup: {
+      inline_keyboard: [
+        [
+          {
+            text: '📢 Join Channel',
+            url: `https://t.me/${cleanUsername}`,
+          },
+        ],
+      ],
+    },
+  };
+};
+
+export const getInstructionKeyboard = (instructionUrl: string): SendMessageOptions => {
+  return {
+    reply_markup: {
+      inline_keyboard: [
+        [
+          {
+            text: '📖 View Instructions',
+            web_app: { url: instructionUrl },
+          },
+        ],
+      ],
+    },
+  };
+};
+

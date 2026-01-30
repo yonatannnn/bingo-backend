@@ -104,8 +104,7 @@ export const MESSAGES = {
   ERROR_CALLBACK: '❌ Error processing request',
   REFERRAL_CODE: (code: string) =>
     `📋 Your Referral Code:\n\n` +
-    `🔗 ${code}\n\n` +
-    `Share this code with your friends to invite them!`,
+    `🔗 ${code}\n\n`,
   INSTRUCTION_LINK: (url: string) =>
     `📖 Instructions\n\n` +
     `Click the link below to view instructions:\n\n` +
