@@ -338,6 +338,21 @@ class ApiClient {
       throw error;
     }
   }
+
+  // Update User Name
+  async updateUserName(userId: string, firstName: string, lastName?: string): Promise<UserResponse> {
+    const response: { message: string; user: UserResponse } = await this.request<{ message: string; user: UserResponse }>(
+      `/api/v1/user/${userId}/name`,
+      {
+        method: 'PUT',
+        body: JSON.stringify({
+          first_name: firstName,
+          last_name: lastName,
+        }),
+      }
+    );
+    return response.user;
+  }
 }
 
 export const apiClient = new ApiClient();

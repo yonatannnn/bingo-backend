@@ -15,6 +15,7 @@ import { setupReferralCodeHandler } from './handlers/referralCodeHandler';
 import { setupInstructionHandler } from './handlers/instructionHandler';
 import { setupJoinChannelHandler } from './handlers/joinChannelHandler';
 import { setupSupportHandler } from './handlers/supportHandler';
+import { setupChangeNameHandler } from './handlers/changeNameHandler';
 import {
   setupDepositHistoryHandler,
   setupWithdrawalHistoryHandler,
@@ -51,6 +52,7 @@ export async function initializeBot() {
     { command: 'transfer_history', description: 'View Transfer History' },
     { command: 'game_history', description: 'View Game History' },
     { command: 'support', description: 'Get Support' },
+    { command: 'change_name', description: 'Change Your Name' },
   ]);
 
   // Setup all handlers
@@ -67,6 +69,7 @@ export async function initializeBot() {
   setupInstructionHandler(bot);
   setupJoinChannelHandler(bot);
   setupSupportHandler(bot);
+  setupChangeNameHandler(bot);
   setupDepositHistoryHandler(bot);
   setupWithdrawalHistoryHandler(bot);
   setupTransferHistoryHandler(bot);

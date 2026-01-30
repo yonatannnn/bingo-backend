@@ -11,6 +11,7 @@ export { setupReferralCodeHandler } from './referralCodeHandler';
 export { setupInstructionHandler } from './instructionHandler';
 export { setupJoinChannelHandler } from './joinChannelHandler';
 export { setupSupportHandler } from './supportHandler';
+export { setupChangeNameHandler } from './changeNameHandler';
 export {
   setupDepositHistoryHandler,
   setupWithdrawalHistoryHandler,

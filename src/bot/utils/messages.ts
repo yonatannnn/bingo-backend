@@ -157,5 +157,13 @@ export const MESSAGES = {
     return item;
   },
   SUPPORT_MESSAGE: 'እባክዎን ከዚህ በታች ያሉትን ቁልፎች በመጫን መረጃ እና ድጋፍ ማግኘት ይችላሉ።',
+  CHANGE_NAME_FIRST_NAME_PROMPT: 'Enter your first name:',
+  CHANGE_NAME_LAST_NAME_PROMPT: (firstName: string) => `First name: ${firstName}\n\nEnter your last name (or send /skip to leave it empty):`,
+  CHANGE_NAME_SUCCESS: (firstName: string, lastName?: string) => {
+    const fullName = lastName ? `${firstName} ${lastName}` : firstName;
+    return `✅ Name updated successfully!\n\nYour new name: ${fullName}`;
+  },
+  CHANGE_NAME_SESSION_EXPIRED: '❌ Name change session expired. Please start over with /change_name',
+  ERROR_CHANGE_NAME: '❌ Error updating name. Please try again.',
 };
 
