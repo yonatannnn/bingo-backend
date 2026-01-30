@@ -43,6 +43,10 @@ export function setupWithdrawHandler(bot: TelegramBot) {
     if (replyText.includes('ምን ያህል') && replyText.includes('ማውጣት') || 
         replyText.includes('withdrawal amount') || 
         (replyText.includes('withdraw') && replyText.includes('balance'))) {
+      // Note: Withdrawal doesn't use pending state, but we check if user exists
+      // If /cancel was sent, the user might have moved on, so we'll still process
+      // but we could add a check here if needed
+      
       let user: any = null;
       let amount: number | undefined = undefined;
       

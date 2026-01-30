@@ -42,6 +42,15 @@ export function setupTransferHandler(bot: TelegramBot) {
 
     // Handle referral code entry
     if (replyText.includes('Referral Code') && replyText.includes('ማስተላለፍ')) {
+      // If there's already a pending transfer, user should finish or cancel first
+      // But if cancelled, pending is cleared, so we can process this as new transfer
+      // This check prevents processing old replies when user is in middle of transfer
+      const existingPending = transferService.getPendingTransfer(chatId);
+      if (existingPending) {
+        // User is already in middle of a transfer - ignore this reply
+        return;
+      }
+
       try {
         const sender = await findUserByTelegramId(chatId);
         if (!sender) {
@@ -81,16 +90,17 @@ export function setupTransferHandler(bot: TelegramBot) {
 
     // Handle transfer amount entry
     if (replyText.includes('ምን ያህል መላል') && (replyText.includes('Receiver') || replyText.includes('balance'))) {
+      // Check pending state first - if cleared by /cancel, ignore this message
+      const pendingTransfer = transferService.getPendingTransfer(chatId);
+      if (!pendingTransfer) {
+        // Session expired or cancelled - ignore this message
+        return;
+      }
+
       try {
         const sender = await findUserByTelegramId(chatId);
         if (!sender) {
           await bot.sendMessage(chatId, MESSAGES.USER_NOT_FOUND);
-          return;
-        }
-
-        const pendingTransfer = transferService.getPendingTransfer(chatId);
-        if (!pendingTransfer) {
-          await bot.sendMessage(chatId, MESSAGES.TRANSFER_SESSION_EXPIRED);
           return;
         }
 

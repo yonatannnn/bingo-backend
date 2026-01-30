@@ -42,17 +42,18 @@ export function setupDepositHandler(bot: TelegramBot) {
     if (replyText.includes('ማስገባት የሚፈልጉትን') || 
         replyText.includes('እባክዎ ምን ያህል መጠቀም') || 
         (replyText.includes('Payment Method') && replyText.includes('የገንዘብ መጠን'))) {
+      // Check pending state first - if cleared by /cancel, ignore this message
+      const pendingDeposit = depositService.getPendingDeposit(chatId);
+      if (!pendingDeposit) {
+        // Session expired or cancelled - ignore this message
+        return;
+      }
+
       try {
         const user = await findUserByTelegramId(chatId);
         if (!user) {
           await bot.sendMessage(chatId, MESSAGES.USER_NOT_FOUND);
           depositService.clearPendingDeposit(chatId);
-          return;
-        }
-
-        const pendingDeposit = depositService.getPendingDeposit(chatId);
-        if (!pendingDeposit) {
-          await bot.sendMessage(chatId, MESSAGES.DEPOSIT_SESSION_EXPIRED);
           return;
         }
 
@@ -103,17 +104,17 @@ export function setupDepositHandler(bot: TelegramBot) {
 
     // Handle Telebirr transaction ID
     if (replyText.includes('ቴሌብር Transaction ID') || replyText.includes('Telebirr Transaction ID')) {
+      // Check pending state first - if cleared by /cancel, ignore this message
+      const pendingDeposit = depositService.getPendingDeposit(chatId);
+      if (!pendingDeposit || pendingDeposit.transactionType !== 'Telebirr') {
+        // Session expired or cancelled - ignore this message
+        return;
+      }
+
       try {
         const user = await findUserByTelegramId(chatId);
         if (!user) {
           await bot.sendMessage(chatId, MESSAGES.USER_NOT_FOUND);
-          depositService.clearPendingDeposit(chatId);
-          return;
-        }
-
-        const pendingDeposit = depositService.getPendingDeposit(chatId);
-        if (!pendingDeposit || pendingDeposit.transactionType !== 'Telebirr') {
-          await bot.sendMessage(chatId, MESSAGES.DEPOSIT_SESSION_EXPIRED);
           depositService.clearPendingDeposit(chatId);
           return;
         }
@@ -146,17 +147,17 @@ export function setupDepositHandler(bot: TelegramBot) {
 
     // Handle CBE transaction ID
     if (replyText.includes('CBE Transaction ID') || replyText.includes('ንግድ ባንክ')) {
+      // Check pending state first - if cleared by /cancel, ignore this message
+      const pendingDeposit = depositService.getPendingDeposit(chatId);
+      if (!pendingDeposit || pendingDeposit.transactionType !== 'CBE') {
+        // Session expired or cancelled - ignore this message
+        return;
+      }
+
       try {
         const user = await findUserByTelegramId(chatId);
         if (!user) {
           await bot.sendMessage(chatId, MESSAGES.USER_NOT_FOUND);
-          depositService.clearPendingDeposit(chatId);
-          return;
-        }
-
-        const pendingDeposit = depositService.getPendingDeposit(chatId);
-        if (!pendingDeposit || pendingDeposit.transactionType !== 'CBE') {
-          await bot.sendMessage(chatId, MESSAGES.DEPOSIT_SESSION_EXPIRED);
           depositService.clearPendingDeposit(chatId);
           return;
         }
