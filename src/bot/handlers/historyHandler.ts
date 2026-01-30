@@ -29,7 +29,7 @@ function formatStatus(status: string): string {
 }
 
 export function setupDepositHistoryHandler(bot: TelegramBot) {
-  bot.onText(/\/deposit history/, async (msg) => {
+  bot.onText(/\/deposit_history/, async (msg) => {
     const chatId = msg.chat.id;
 
     try {
@@ -69,7 +69,7 @@ export function setupDepositHistoryHandler(bot: TelegramBot) {
 }
 
 export function setupWithdrawalHistoryHandler(bot: TelegramBot) {
-  bot.onText(/\/withdrawal history/, async (msg) => {
+  bot.onText(/\/withdrawal_history/, async (msg) => {
     const chatId = msg.chat.id;
 
     try {
@@ -107,7 +107,7 @@ export function setupWithdrawalHistoryHandler(bot: TelegramBot) {
 }
 
 export function setupTransferHistoryHandler(bot: TelegramBot) {
-  bot.onText(/\/transfer history/, async (msg) => {
+  bot.onText(/\/transfer_history/, async (msg) => {
     const chatId = msg.chat.id;
 
     try {

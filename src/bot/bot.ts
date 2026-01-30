@@ -46,9 +46,9 @@ export async function initializeBot() {
     { command: 'referal_code', description: 'Get Your Referral Code' },
     { command: 'instruction', description: 'View Instructions' },
     { command: 'join_channel', description: 'Join Our Channel' },
-    { command: 'deposit history', description: 'View Deposit History' },
-    { command: 'withdrawal history', description: 'View Withdrawal History' },
-    { command: 'transfer history', description: 'View Transfer History' },
+    { command: 'deposit_history', description: 'View Deposit History' },
+    { command: 'withdrawal_history', description: 'View Withdrawal History' },
+    { command: 'transfer_history', description: 'View Transfer History' },
     { command: 'game_history', description: 'View Game History' },
     { command: 'support', description: 'Get Support' },
   ]);
