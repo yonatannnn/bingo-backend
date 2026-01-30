@@ -65,3 +65,22 @@ export const getForceReplyKeyboard = (placeholder: string): SendMessageOptions =
   },
 });
 
+export const getSupportKeyboard = (supportUsernames: string[]): SendMessageOptions => {
+  // Remove @ if present and create buttons
+  const buttons = supportUsernames.map((username) => {
+    const cleanUsername = username.replace(/^@/, '');
+    return [
+      {
+        text: `📞 @${cleanUsername}`,
+        url: `https://t.me/${cleanUsername}`,
+      },
+    ];
+  });
+
+  return {
+    reply_markup: {
+      inline_keyboard: buttons,
+    },
+  };
+};
+

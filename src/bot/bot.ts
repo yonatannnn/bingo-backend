@@ -11,6 +11,16 @@ import { setupTransferHandler } from './handlers/transferHandler';
 import { setupCancelHandler } from './handlers/cancelHandler';
 import { setupCallbackHandler } from './handlers/callbackHandler';
 import { setupBalanceHandler } from './handlers/balanceHandler';
+import { setupReferralCodeHandler } from './handlers/referralCodeHandler';
+import { setupInstructionHandler } from './handlers/instructionHandler';
+import { setupJoinChannelHandler } from './handlers/joinChannelHandler';
+import { setupSupportHandler } from './handlers/supportHandler';
+import {
+  setupDepositHistoryHandler,
+  setupWithdrawalHistoryHandler,
+  setupTransferHistoryHandler,
+  setupGameHistoryHandler,
+} from './handlers/historyHandler';
 
 dotenv.config();
 
@@ -27,12 +37,20 @@ export async function initializeBot() {
   // Set bot commands menu
   await bot.setMyCommands([
     { command: 'register', description: 'Register to Play' },
-    { command: 'withdraw', description: 'Make a Withdrawal' },
+    { command: 'play', description: 'Start Playing' },
     { command: 'deposit', description: 'Make a Deposit' },
+    { command: 'withdraw', description: 'Make a Withdrawal' },
     { command: 'transfer', description: 'Transfer for a Friend' },
     { command: 'checkbalance', description: 'Check Your Balance' },
-    { command: 'play', description: 'Start Playing' },
     { command: 'cancel', description: 'Cancel Current Operation' },
+    { command: 'referal_code', description: 'Get Your Referral Code' },
+    { command: 'instruction', description: 'View Instructions' },
+    { command: 'join_channel', description: 'Join Our Channel' },
+    { command: 'deposit history', description: 'View Deposit History' },
+    { command: 'withdrawal history', description: 'View Withdrawal History' },
+    { command: 'transfer history', description: 'View Transfer History' },
+    { command: 'game_history', description: 'View Game History' },
+    { command: 'support', description: 'Get Support' },
   ]);
 
   // Setup all handlers
@@ -45,6 +63,14 @@ export async function initializeBot() {
   setupCancelHandler(bot);
   setupCallbackHandler(bot);
   setupBalanceHandler(bot);
+  setupReferralCodeHandler(bot);
+  setupInstructionHandler(bot);
+  setupJoinChannelHandler(bot);
+  setupSupportHandler(bot);
+  setupDepositHistoryHandler(bot);
+  setupWithdrawalHistoryHandler(bot);
+  setupTransferHistoryHandler(bot);
+  setupGameHistoryHandler(bot);
 
   console.log('✅ Telegram bot initialized');
   return bot;

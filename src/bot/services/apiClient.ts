@@ -283,6 +283,46 @@ class ApiClient {
       }
     );
   }
+
+  // Transaction History Endpoints
+  async getDepositHistory(userId: string): Promise<{ deposits: any[]; count: number }> {
+    try {
+      return await this.request<{ deposits: any[]; count: number }>(
+        `/api/v1/wallet/${userId}/deposits`
+      );
+    } catch (error: any) {
+      if (error.message?.includes('404') || error.message?.includes('not found')) {
+        return { deposits: [], count: 0 };
+      }
+      throw error;
+    }
+  }
+
+  async getWithdrawalHistory(userId: string): Promise<{ withdrawals: any[]; count: number }> {
+    try {
+      return await this.request<{ withdrawals: any[]; count: number }>(
+        `/api/v1/wallet/${userId}/withdrawals`
+      );
+    } catch (error: any) {
+      if (error.message?.includes('404') || error.message?.includes('not found')) {
+        return { withdrawals: [], count: 0 };
+      }
+      throw error;
+    }
+  }
+
+  async getTransferHistory(userId: string): Promise<{ transfers: any[]; count: number }> {
+    try {
+      return await this.request<{ transfers: any[]; count: number }>(
+        `/api/v1/wallet/${userId}/transfers`
+      );
+    } catch (error: any) {
+      if (error.message?.includes('404') || error.message?.includes('not found')) {
+        return { transfers: [], count: 0 };
+      }
+      throw error;
+    }
+  }
 }
 
 export const apiClient = new ApiClient();

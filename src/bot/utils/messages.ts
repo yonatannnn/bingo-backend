@@ -102,5 +102,47 @@ export const MESSAGES = {
   ERROR_CANCEL: '❌ Error processing cancel request. Please try again.',
   ERROR_PLAY: '❌ Error opening game. Please try again.',
   ERROR_CALLBACK: '❌ Error processing request',
+  REFERRAL_CODE: (code: string) =>
+    `📋 Your Referral Code:\n\n` +
+    `🔗 ${code}\n\n` +
+    `Share this code with your friends to invite them!`,
+  INSTRUCTION_LINK: (url: string) =>
+    `📖 Instructions\n\n` +
+    `Click the link below to view instructions:\n\n` +
+    `${url}`,
+  JOIN_CHANNEL_LINK: (channelUsername: string) =>
+    `📢 Join Our Channel\n\n` +
+    `Click the link below to join:\n\n` +
+    `https://t.me/${channelUsername}`,
+  NO_DEPOSIT_HISTORY: '📥 No deposit history found.',
+  NO_WITHDRAWAL_HISTORY: '📤 No withdrawal history found.',
+  NO_TRANSFER_HISTORY: '💸 No transfer history found.',
+  NO_GAME_HISTORY: '🎮 No game history found.',
+  DEPOSIT_HISTORY_HEADER: '📥 Deposit History:\n\n',
+  WITHDRAWAL_HISTORY_HEADER: '📤 Withdrawal History:\n\n',
+  TRANSFER_HISTORY_HEADER: '💸 Transfer History:\n\n',
+  GAME_HISTORY_HEADER: '🎮 Game History:\n\n',
+  TRANSACTION_ITEM: (index: number, amount: number, status: string, date: string, transactionId?: string, transactionType?: string) => {
+    let item = `${index}. Amount: ${amount} Birr\n`;
+    item += `   Status: ${status}\n`;
+    if (transactionType) {
+      item += `   Type: ${transactionType}\n`;
+    }
+    if (transactionId) {
+      item += `   Transaction ID: ${transactionId}\n`;
+    }
+    item += `   Date: ${date}\n`;
+    return item;
+  },
+  TRANSFER_ITEM: (index: number, amount: number, type: string, status: string, date: string, reference?: string) => {
+    let item = `${index}. ${type === 'transfer_out' ? 'Sent' : 'Received'}: ${amount} Birr\n`;
+    item += `   Status: ${status}\n`;
+    if (reference) {
+      item += `   ${type === 'transfer_out' ? 'To' : 'From'}: ${reference.substring(0, 8)}...\n`;
+    }
+    item += `   Date: ${date}\n`;
+    return item;
+  },
+  SUPPORT_MESSAGE: 'እባክዎን ከዚህ በታች ያሉትን ቁልፎች በመጫን መረጃ እና ድጋፍ ማግኘት ይችላሉ።',
 };
 
