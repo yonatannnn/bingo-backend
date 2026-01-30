@@ -11,7 +11,7 @@ export function setupInstructionHandler(bot: TelegramBot) {
       const instructionUrl = `${frontendUrl}/instruction`;
       const keyboard = getInstructionKeyboard(instructionUrl);
       
-      await bot.sendMessage(chatId, MESSAGES.INSTRUCTION_LINK(instructionUrl), keyboard);
+      await bot.sendMessage(chatId, '', keyboard);
     } catch (error) {
       console.error('Instruction error:', error);
       await bot.sendMessage(chatId, '❌ Error opening instructions. Please try again.');
