@@ -16,7 +16,9 @@ export function setupCancelHandler(bot: TelegramBot) {
       changeNameService.clearPendingNameChange(chatId);
 
       const welcomeText = MESSAGES.WELCOME;
-      const keyboard = getMainMenuKeyboard();
+      // Get channel username from environment variable
+      const channelUsername = process.env.CHANNEL_USERNAME;
+      const keyboard = getMainMenuKeyboard(channelUsername);
 
       try {
         const imagePath = path.join(__dirname, '../../../asset/bingo.png');

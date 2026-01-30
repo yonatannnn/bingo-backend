@@ -1,17 +1,46 @@
 import { SendMessageOptions } from 'node-telegram-bot-api';
 
-export const getMainMenuKeyboard = (): SendMessageOptions => ({
-  reply_markup: {
-    inline_keyboard: [
-      [{ text: '📝 Register', callback_data: 'register' }],
-      [{ text: '🎮 Play', callback_data: 'play' }],
-      [{ text: '💰 Deposit', callback_data: 'deposit' }],
-      [{ text: '📢 Join Channel', url: 'https://t.me/your_channel' }],
-      [{ text: '💸 Withdraw', callback_data: 'withdraw' }],
-      [{ text: '🔄 Transfer', callback_data: 'transfer' }],
-    ],
-  },
-});
+export const getMainMenuKeyboard = (channelUsername?: string): SendMessageOptions => {
+  const buttons: any[] = [];
+  
+  // Row 1: Register | Play
+  buttons.push([
+    { text: '📝 Register', callback_data: 'register' },
+    { text: '🎮 Play', callback_data: 'play' }
+  ]);
+
+  // Row 2: Deposit | Join Channel (if available) or Withdraw
+  if (channelUsername) {
+    const cleanUsername = channelUsername.replace(/^@/, '');
+    buttons.push([
+      { text: '💰 Deposit', callback_data: 'deposit' },
+      { text: '📢 Join Channel', url: `https://t.me/${cleanUsername}` }
+    ]);
+  } else {
+    buttons.push([
+      { text: '💰 Deposit', callback_data: 'deposit' },
+      { text: '💸 Withdraw', callback_data: 'withdraw' }
+    ]);
+  }
+
+  // Row 3: Withdraw | Transfer (or just Transfer if channel button was in row 2)
+  if (channelUsername) {
+    buttons.push([
+      { text: '💸 Withdraw', callback_data: 'withdraw' },
+      { text: '🔄 Transfer', callback_data: 'transfer' }
+    ]);
+  } else {
+    buttons.push([
+      { text: '🔄 Transfer', callback_data: 'transfer' }
+    ]);
+  }
+
+  return {
+    reply_markup: {
+      inline_keyboard: buttons,
+    },
+  };
+};
 
 export const getContactKeyboard = (): SendMessageOptions => ({
   reply_markup: {
