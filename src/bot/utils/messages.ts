@@ -133,11 +133,11 @@ export const MESSAGES = {
     item += `   Date: ${date}\n`;
     return item;
   },
-  TRANSFER_ITEM: (index: number, amount: number, type: string, status: string, date: string, reference?: string) => {
+  TRANSFER_ITEM: (index: number, amount: number, type: string, status: string, date: string, otherPartyName?: string) => {
     let item = `${index}. ${type === 'transfer_out' ? 'Sent' : 'Received'}: ${amount} Birr\n`;
     item += `   Status: ${status}\n`;
-    if (reference) {
-      item += `   ${type === 'transfer_out' ? 'To' : 'From'}: ${reference.substring(0, 8)}...\n`;
+    if (otherPartyName) {
+      item += `   ${type === 'transfer_out' ? 'To' : 'From'}: ${otherPartyName}\n`;
     }
     item += `   Date: ${date}\n`;
     return item;

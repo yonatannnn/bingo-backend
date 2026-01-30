@@ -126,14 +126,25 @@ export function setupTransferHistoryHandler(bot: TelegramBot) {
       }
 
       let message = MESSAGES.TRANSFER_HISTORY_HEADER;
-      history.transfers.forEach((transfer, index) => {
+      history.transfers.forEach((transferEntry, index) => {
+        const transfer = transferEntry.transaction || transferEntry;
+        const otherParty = transferEntry.to;
+        
+        // Extract other party's name (first_name + last_name)
+        let otherPartyName = 'Unknown';
+        if (otherParty) {
+          const firstName = otherParty.first_name || '';
+          const lastName = otherParty.last_name || '';
+          otherPartyName = `${firstName} ${lastName}`.trim() || 'Unknown';
+        }
+        
         message += MESSAGES.TRANSFER_ITEM(
           index + 1,
           transfer.amount,
           transfer.type,
           formatStatus(transfer.status),
           formatDate(transfer.created_at),
-          transfer.reference
+          otherPartyName
         );
         message += '\n';
       });

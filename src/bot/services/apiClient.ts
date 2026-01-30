@@ -313,6 +313,7 @@ class ApiClient {
 
   async getTransferHistory(userId: string): Promise<{ transfers: any[]; count: number }> {
     try {
+      // New API format includes user information in "to" field
       return await this.request<{ transfers: any[]; count: number }>(
         `/api/v1/wallet/${userId}/transfers`
       );
