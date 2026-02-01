@@ -29,6 +29,7 @@ export const MESSAGES = {
 (Example:- Telebirr: CDF8QQMTVE)
 
 📱 ወደ ቴሌብር ለማስገባት: ${accountNumber}
+👤 Name: Mikiyas Abiyot
 
 👉 ቁጥሮቹን Copy ለማድረግ እባኮትን የፅሁፍ አካላቸውን ያጫኑ።
 
@@ -38,6 +39,7 @@ export const MESSAGES = {
 (Example:- CBE(Bank): FT25106S48WP)
 
 💵 ወደ ንግድ ባንክ ለማስገባት: ${accountNumber}
+👤 Name: Mikiyas Abiyot
 
 👉 ቁጥሮቹን Copy ለማድረግ እባኮትን የፅሁፍ አካላቸውን ያጫኑ።
 

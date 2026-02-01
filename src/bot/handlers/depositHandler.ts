@@ -122,6 +122,12 @@ export function setupDepositHandler(bot: TelegramBot) {
         const transactionId = text.trim();
         if (!validateTransactionId(transactionId)) {
           await bot.sendMessage(chatId, MESSAGES.INVALID_TRANSACTION_ID('CDF8QQMTVE'));
+          // Ask for transaction ID again
+          await bot.sendMessage(
+            chatId,
+            MESSAGES.TELEBIRR_DETAILS(pendingDeposit.amount, DEPOSIT_CONFIG.TELEBIRR_ACCOUNT),
+            getForceReplyKeyboard('Enter Telebirr Transaction ID')
+          );
           return;
         }
 
@@ -165,6 +171,12 @@ export function setupDepositHandler(bot: TelegramBot) {
         const transactionId = text.trim();
         if (!validateTransactionId(transactionId)) {
           await bot.sendMessage(chatId, MESSAGES.INVALID_TRANSACTION_ID('FT25106S48WP'));
+          // Ask for transaction ID again
+          await bot.sendMessage(
+            chatId,
+            MESSAGES.CBE_DETAILS(pendingDeposit.amount, DEPOSIT_CONFIG.CBE_ACCOUNT),
+            getForceReplyKeyboard('Enter CBE Transaction ID')
+          );
           return;
         }
 
