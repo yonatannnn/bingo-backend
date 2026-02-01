@@ -121,11 +121,10 @@ export function setupDepositHandler(bot: TelegramBot) {
 
         const transactionId = text.trim();
         if (!validateTransactionId(transactionId)) {
-          await bot.sendMessage(chatId, MESSAGES.INVALID_TRANSACTION_ID('CDF8QQMTVE'));
-          // Ask for transaction ID again
+          // Send error and retry prompt in one message
           await bot.sendMessage(
             chatId,
-            MESSAGES.TELEBIRR_DETAILS(pendingDeposit.amount, DEPOSIT_CONFIG.TELEBIRR_ACCOUNT),
+            MESSAGES.TELEBIRR_DETAILS_WITH_ERROR(pendingDeposit.amount, DEPOSIT_CONFIG.TELEBIRR_ACCOUNT, 'CDF8QQMTVE'),
             getForceReplyKeyboard('Enter Telebirr Transaction ID')
           );
           return;
@@ -170,11 +169,10 @@ export function setupDepositHandler(bot: TelegramBot) {
 
         const transactionId = text.trim();
         if (!validateTransactionId(transactionId)) {
-          await bot.sendMessage(chatId, MESSAGES.INVALID_TRANSACTION_ID('FT25106S48WP'));
-          // Ask for transaction ID again
+          // Send error and retry prompt in one message
           await bot.sendMessage(
             chatId,
-            MESSAGES.CBE_DETAILS(pendingDeposit.amount, DEPOSIT_CONFIG.CBE_ACCOUNT),
+            MESSAGES.CBE_DETAILS_WITH_ERROR(pendingDeposit.amount, DEPOSIT_CONFIG.CBE_ACCOUNT, 'FT25106S48WP'),
             getForceReplyKeyboard('Enter CBE Transaction ID')
           );
           return;

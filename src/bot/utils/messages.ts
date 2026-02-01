@@ -89,6 +89,22 @@ export const MESSAGES = {
     `Your new balance: ${newBalance} Birr`,
   INVALID_TRANSACTION_ID: (example: string) =>
     `❌ Invalid Transaction ID format. Please enter a valid Transaction ID.\n\n(Example: ${example})`,
+  TELEBIRR_DETAILS_WITH_ERROR: (amount: number, accountNumber: string, example: string) =>
+    `❌ Invalid Transaction ID format. Please enter a valid Transaction ID.\n\n(Example: ${example})\n\n` +
+    `Amount: ${amount} Birr\n\n` +
+    `(Example:- Telebirr: ${example})\n\n` +
+    `📱 ወደ ቴሌብር ለማስገባት: ${accountNumber}\n` +
+    `👤 Name: Mikiyas Abiyot\n\n` +
+    `👉 ቁጥሮቹን Copy ለማድረግ እባኮትን የፅሁፍ አካላቸውን ያጫኑ።\n\n` +
+    `📱 እባክዎ የቴሌብር Transaction ID ያስገቡ:`,
+  CBE_DETAILS_WITH_ERROR: (amount: number, accountNumber: string, example: string) =>
+    `❌ Invalid Transaction ID format. Please enter a valid Transaction ID.\n\n(Example: ${example})\n\n` +
+    `Amount: ${amount} Birr\n\n` +
+    `(Example:- CBE(Bank): ${example})\n\n` +
+    `💵 ወደ ንግድ ባንክ ለማስገባት: ${accountNumber}\n` +
+    `👤 Name: Mikiyas Abiyot\n\n` +
+    `👉 ቁጥሮቹን Copy ለማድረግ እባኮትን የፅሁፍ አካላቸውን ያጫኑ።\n\n` +
+    `🏦 እባክዎ የCBE Transaction ID ያስገቡ:`,
   INVALID_AMOUNT: '❌ Invalid amount. Please enter a valid number greater than 0.',
   INSUFFICIENT_BALANCE: (currentBalance: number, requestedAmount: number) =>
     `❌ Insufficient balance!\n\n` +
