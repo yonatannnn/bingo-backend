@@ -6,12 +6,11 @@ export const MESSAGES = {
   REGISTER_PROMPT: 'Please share your contact information to register.',
   ALREADY_REGISTERED: '❌ You are already registered! Please use /play to start playing.',
   PHONE_ALREADY_REGISTERED: '❌ This phone number is already registered with another account.',
-  REGISTRATION_SUCCESS: (firstName: string, lastName: string, phone: string, balance: number, demoGames: number, referralCode: string) =>
+  REGISTRATION_SUCCESS: (firstName: string, lastName: string, phone: string, balance: number, referralCode: string) =>
     `✅ Registration successful!\n\n` +
     `Name: ${firstName} ${lastName}\n` +
     `Phone: ${phone}\n` +
     `Balance: ${balance}\n` +
-    `Demo Games: ${demoGames}\n` +
     `Referral Code: ${referralCode}` + '\n\n' +
     `/play to start playing`,
   NOT_REGISTERED: '❌ Please register first using /register',
@@ -57,10 +56,9 @@ export const MESSAGES = {
     `እባክዎ ትንሽ ይጠብቁ፤ ክፍያዎ እየተረጋገጠ ነው።\n\n` +
     `ክፍያዎ ከተረጋገጠ በኋላ ወደ ሂሳብዎ ይጨመራል።`,
   DEPOSIT_SESSION_EXPIRED: '❌ Deposit session expired. Please start over.',
-  BALANCE_INFO: (balance: number, demoBalance: number) =>
+  BALANCE_INFO: (balance: number) =>
     `💰 የእርስዎ የአሁኑ ሂሳብ\n\n` +
-    `Balance: ${balance} Birr\n` +
-    `Demo Balance: ${demoBalance} Birr`,
+    `Balance: ${balance} Birr`,
   WITHDRAW_BALANCE_PROMPT: (balance: number) =>
     `💰 የእርስዎ የአሁኑ ሂሳብ: ${balance} Birr\n\n` +
     `ምን ያህል  ማውጣት ይፈልጋሉ?`,

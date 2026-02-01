@@ -49,7 +49,6 @@ export function setupRegisterHandler(bot: TelegramBot) {
         user.lastName ?? '',
         user.phone,
         user.balance,
-        user.demoGames ?? 0,
         user.referralCode ?? ''
       );
 

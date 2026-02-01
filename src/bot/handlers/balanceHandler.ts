@@ -15,7 +15,7 @@ export function setupBalanceHandler(bot: TelegramBot) {
         return;
       }
 
-      await bot.sendMessage(chatId, MESSAGES.BALANCE_INFO(wallet.balance, wallet.demoBalance));
+      await bot.sendMessage(chatId, MESSAGES.BALANCE_INFO(wallet.balance));
     } catch (error) {
       console.error('Check balance error:', error);
       await bot.sendMessage(chatId, '❌ Error fetching balance. Please try again.');
