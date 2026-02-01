@@ -1,6 +1,6 @@
 export const validateTransactionId = (transactionId: string): boolean => {
-  // Alphanumeric, 6-20 characters
-  return /^[A-Z0-9]{6,20}$/i.test(transactionId.trim());
+  // Minimum 4 characters required
+  return transactionId.trim().length >= 4;
 };
 
 export const validateAmount = (amount: string): { valid: boolean; value?: number; error?: string } => {
