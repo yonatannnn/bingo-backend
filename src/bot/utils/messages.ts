@@ -1,5 +1,5 @@
 // Project name constant
-export const PROJECT_NAME = 'Name';
+export const PROJECT_NAME = 'Biruh Bingo';
 
 export const MESSAGES = {
   WELCOME: `Welcome to ${PROJECT_NAME} Bingo! 🎮`,
@@ -12,7 +12,8 @@ export const MESSAGES = {
     `Phone: ${phone}\n` +
     `Balance: ${balance}\n` +
     `Demo Games: ${demoGames}\n` +
-    `Referral Code: ${referralCode}`,
+    `Referral Code: ${referralCode}` + '\n\n' +
+    `/play to start playing`,
   NOT_REGISTERED: '❌ Please register first using /register',
   USER_NOT_FOUND: '❌ User not found. Please register first.',
   OPERATION_CANCELLED: '✅ Operation cancelled. You can start fresh!',
